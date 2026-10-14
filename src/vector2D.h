@@ -1,7 +1,9 @@
 #ifndef VECTOR2D_H
 #define VECTOR2D_H
 
-#include <iostream>
+#include <concepts> //std::floating_point
+#include <cmath> //std::sqrt
+
 
 /**
  * Vector bidimensional genérico.
@@ -17,13 +19,36 @@ public:
 
 	// Coordenadas del vector
 	T getX() const { return x; }
+	T getY() const { return y; }
 
 	// Operadores
+	//suma y resta, devuelven un vector nuevo pero no toca ninguno de los dos
 	Vector2D operator+(const Vector2D& otro) const {
 		return {x + otro.x, y + otro.y};
 	}
+	Vector2D operator-(const Vector2D& otro) const {
+		return { x - otro.x, y - otro.y };
+	}
 
-	// TODO: completar
+	// dos operator* distintos el programa elige uno segun el tipo de arguemnto
+	Vector2D operator*(T k) const { // vector * numero
+		return { x * k, y * k };
+	}
+	T operator*(const Vector2D& otro) const {
+		return x * otro.x + y * otro.y; // producto escalar
+	}
+
+	//si modifica el vector asi q no es const
+	//referencia a si mismo para que se comporte como un += de un int
+	Vector2D& operator+=(const Vector2D& otro){
+		x += otro.x;
+		y += otro.y;
+		return *this;
+	}
+
+	T length() const {
+		return std::sqrt(x * x + y * y); //pitagoras
+	}
 
 	// Operadores de entrada/salida
 	friend std::ostream& operator<<(std::ostream& out, const Vector2D& v) {
@@ -31,6 +56,7 @@ public:
 	}
 };
 
-// TODO: definir alias Point2D<T>
+template<std::floating_point T = float>
+using Point2D = Vector2D<T>;
 
 #endif // VECTOR2D_H
