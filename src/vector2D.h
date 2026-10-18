@@ -42,8 +42,8 @@ public:
 	}
 
 	Vector2D operator*=(T k) const {
-		x *= otro;
-		y *= otro;
+		x *= k;
+		y *= k;
 		return *this;
 	}
 

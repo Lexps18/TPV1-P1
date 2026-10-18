@@ -59,7 +59,7 @@ Bow::handleEvent(const SDL_Event& event)
 	}
 	else if (event.type == SDL_EVENT_KEY_UP) {
 		if (event.key.key == SDLK_UP || event.key.key == SDLK_DOWN)
-			direction = { 0, 0 };		// si se suelta ↑ o ↓, quedarse quieto
+			direction = { 0, 0 };		
 	}
 }
 
