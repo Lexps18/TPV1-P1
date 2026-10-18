@@ -23,32 +23,32 @@ public:
 	T getY() const { return y; }
 
 	// Operadores
-	//suma y resta, devuelven un vector nuevo pero no toca ninguno de los dos
 	Vector2D operator+(const Vector2D& otro) const {
 		return {x + otro.x, y + otro.y};
 	}
-	Vector2D operator-(const Vector2D& otro) const {
-		return { x - otro.x, y - otro.y };
-	}
 
-	// dos operator* distintos el programa elige uno segun el tipo de arguemnto
-	Vector2D operator*(T k) const { // vector * numero
-		return { x * k, y * k };
-	}
-	T operator*(const Vector2D& otro) const {
-		return x * otro.x + y * otro.y; // producto escalar
-	}
-
-	//si modifica el vector asi q no es const
-	//referencia a si mismo para que se comporte como un += de un int
-	Vector2D& operator+=(const Vector2D& otro){
+	Vector2D& operator+=(const Vector2D& otro) {
 		x += otro.x;
 		y += otro.y;
 		return *this;
 	}
 
+	Vector2D operator-(const Vector2D& otro) const {
+		return { x - otro.x, y - otro.y };
+	}
+
+	Vector2D operator*(T k) const {
+		return { x * k, y * k };
+	}
+
+	Vector2D operator*=(T k) const {
+		x *= otro;
+		y *= otro;
+		return *this;
+	}
+
 	T length() const {
-		return std::sqrt(x * x + y * y); //pitagoras
+		return std::sqrt(x * x + y * y);
 	}
 
 	// Operadores de entrada/salida
@@ -57,8 +57,6 @@ public:
 	}
 };
 
-//mismo tipo solo nombre diferente
-//para un punto en lugar de direccion
 template<std::floating_point T = float>
 using Point2D = Vector2D<T>;
 

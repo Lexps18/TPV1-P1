@@ -2,13 +2,11 @@
 #include "game.h"
 #include "texture.h"
 
-constexpr float ARROW_WIDTH = 80.0f;
-
 Arrow::Arrow(Game* game, Texture* texture, Point2D<> start, Vector2D<> velocity)
 	: game(game)
 	, texture(texture)
-	, width(ARROW_WIDTH)
-	, height(ARROW_WIDTH * texture->getFrameHeight() / texture->getFrameWidth())
+	, width(WIDTH)
+	, height(WIDTH * texture->getFrameHeight() / texture->getFrameWidth())
 	, position(start.getX(), start.getY() - height / 2)   // centrada en vertical
 	, velocity(velocity)
 {
@@ -27,7 +25,7 @@ Arrow::update(float delta)
 {
 	position += velocity * delta;
 
-	// comprobar colisión 
+	// TODO comprobar colisión 
 
 	// Sigue viva mientras su borde izquierdo no haya pasado el borde derecho de la ventana
 	return position.getX() < Game::WINDOW_WIDTH;

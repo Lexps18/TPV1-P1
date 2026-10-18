@@ -59,52 +59,47 @@ Game::Game()
 		}
 	}
 	catch (...) {
-		// TODO: liberar la memoria reservada porque el destructor no se llamara
-		freeResources(); 
-		throw; // relanza la excepción para que llegue al main
+		// Si falla una textura, el destructor no se llamará
+		for (Texture* texture : textures)
+			delete texture;
+
+		SDL_DestroyRenderer(renderer);
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+
+		throw;
 	}
 
 	// Configura que se pueden utilizar capas translúcidas
 	// SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-	// TODO: crear los objetos del juego
-	//prueba: globos puestos a mano
+	//prueb de globos
 	balloons.push_back(new Balloon(getTexture(BALLOONS), Point2D<>(200, WINDOW_HEIGHT), Vector2D<>(0, -100), 0));
 	balloons.push_back(new Balloon(getTexture(BALLOONS), Point2D<>(500, WINDOW_HEIGHT), Vector2D<>(0, -200), 3));
 
 	//arco
-	bow = new Bow(this, getTexture(BOW), INITIAL_ARROWS);
+	bow = new Bow(this, getTexture(BOW), { 10, ((WINDOW_HEIGHT - Bow::HEIGHT) / 2)}, INITIAL_ARROWS);
 }
 
 Game::~Game()
 {
-	// TODO: liberar la memoria reservada por la clase
-	freeResources();
-}
+	// Liberar los objetos libres
+	delete bow;
 
-void Game::freeResources() 
-{
-	//primero los objetos del juego
 	for (Balloon* balloon : balloons) {
 		delete balloon;
 	}
-	balloons.clear();
 
 	for (Arrow* arrow : arrows) {
 		delete arrow;
 	}
-	arrows.clear();
 
-	delete bow;
-	bow = nullptr;
-
-	//delete de bullptr no hace nada, por eso el textures.fill(nullptr) del constructor:
-	//asi las texturas que no llegaron a cargarse se pueden "borrar" sin problema
-	for (Texture* texture : textures) {
-		delete texture;
+	// Liberar cada textura
+	for (int i = 0; i < textures.size(); i++) {
+		delete textures[i];
 	}
 
-	SDL_DestroyRenderer(renderer); 
+	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
@@ -113,10 +108,8 @@ void
 Game::render() const
 {
 	SDL_SetRenderDrawColor(renderer, 0, 170, 85, 255);    // fondo verde
-
 	SDL_RenderClear(renderer);
 
-	// TODO
 	bow->render();
 
 	for (Arrow* arrow : arrows) {
@@ -169,9 +162,9 @@ Game::run()
 		//momento en que empieza este ciclo
 		Uint64 frameStart = SDL_GetTicks();
 
-		handleEvents(); //1. leer teclado/raton/cerrar ventana
-		update(); //2. mover los objetos
-		render(); //3. pintarlos
+		handleEvents();
+		update(); 
+		render(); 
 
 		//si el ciclo ha tardado menos de Frame_Period, esperar
 		Uint64 frameTime = SDL_GetTicks() - frameStart;
@@ -186,12 +179,10 @@ Game::handleEvents()
 {
 	SDL_Event event;
 
-	// Only quit is handled directly, everything else is delegated
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_EVENT_QUIT)
 			exit = true;
 
-		// TODO
 		bow->handleEvent(event); 
 	}
 }

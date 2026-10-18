@@ -1,93 +1,69 @@
 #include "bow.h"
-
-#include <iostream>
 #include "texture.h"
-#include "game.h"  // para Game::WINDOW_HEIGHT
+#include "game.h" 
 #include "arrow.h"
 
-using namespace std;
-
-//velocidad vertical del arco
-constexpr float BOW_SPEED = 300.0f;
-
-constexpr float BOW_HEIGHT = 130.0f;
-
-// Velocidad con la que sale la flecha
-constexpr float ARROW_SPEED = 500.0f;
-
-Bow::Bow(Game* game, Texture* texture, int numArrows): 
-	game(game),
-	texture(texture),
-	width(BOW_HEIGHT* texture->getFrameWidth() / texture->getFrameHeight()),
-	height(BOW_HEIGHT),
-	position(0, (Game::WINDOW_HEIGHT - height) / 2), //pegado a la izquierda, centrado
-	direction(0),
-	arrows(numArrows),
-	loaded(false)
-{ }
-
-void Bow::render() const {
-	SDL_FRect dest{ position.getX(), position.getY(), width, height };
-
-	texture->renderFrame(dest, 0, loaded ? 0 : 1);
+Bow::Bow(Game* game, Texture* texture, Point2D<> position, int numArrows)
+	: game(game), texture(texture), position(position),	direction (0, 0), arrows(numArrows), loaded(false)
+{
 }
 
-bool Bow::update(float delta) {
-	//mover segun direccion dejada por handleEvent
-	position += Vector2D<>(0, direction * BOW_SPEED * delta);
+void 
+Bow::render() const {
+	SDL_FRect target{ position.getX(), position.getY(), WIDTH, HEIGHT };
+	int frame;
+	if (loaded)
+		frame = 0;   // arco con flecha
+	else
+		frame = 1;   // arco sin flecha
+	texture->renderFrame(target, 0, frame);
+}
 
-	//no dejar que sw salogo ni por arriba nipor abajo
+bool 
+Bow::update(float delta) {
+	position += direction * (SPEED * delta);
+
 	if (position.getY() < 0) {
-		position = Point2D<>(position.getX(), 0);
+		position = { position.getX(), 0 };
 	}
-	else if (position.getY() + height > Game::WINDOW_HEIGHT) {
-		position = Point2D<>(position.getX(), Game::WINDOW_HEIGHT - height);
+	else if (position.getY() + HEIGHT > Game::WINDOW_HEIGHT) {
+		position = Point2D<>(position.getX(), Game::WINDOW_HEIGHT - HEIGHT);
 	}
 
 	return true; //el arco nunca se elimina durante la partida
 }
 
-void Bow::handleEvent(const SDL_Event& event){
+void 
+Bow::handleEvent(const SDL_Event& event) 
+{
 	if (event.type == SDL_EVENT_KEY_DOWN) {
-		onKeyDown(event.key.key);
+		switch (event.key.key) {
+		case SDLK_UP:
+			direction = { 0, -1 };		// dirección arriba
+			break;
+		case SDLK_DOWN:
+			direction = { 0, 1 };		// dirección abajo
+			break;
+		case SDLK_LEFT:
+			if (arrows > 0)
+				loaded = true;			// cargar, solo si quedan flechas
+			break;
+		case SDLK_RIGHT:
+			if (loaded) {
+				loaded = false;
+				arrows--;
+				shoot();
+			}
+			break;
+		}
 	}
 	else if (event.type == SDL_EVENT_KEY_UP) {
-		onKeyUp(event.key.key);
-	}
-}
-
-void Bow::onKeyDown(SDL_Keycode key) {
-	switch (key) {
-	case SDLK_UP: direction = -1; break;
-	case SDLK_DOWN: direction = 1; break;
-
-	case SDLK_LEFT: //cargar solo si no esta catgado ya y si quedan flechas
-		if (!loaded && arrows > 0) {
-			loaded = true;
-		}
-		break;
-
-	case SDLK_RIGHT: //disparar solo si esta cargado
-		if (loaded) {
-			loaded = false;
-			--arrows;
-			cout << "Flechas restantes: " << arrows << '\n';
-			shoot();
-		}
-		break;
-	}
-}
-
-
-void Bow::onKeyUp(SDL_Keycode key) {
-	//solo nos paramos si se suelta la tecla en la direccion actual
-	if ((key == SDLK_UP && direction == -1) || (key == SDLK_DOWN && direction == 1)) {
-		direction = 0;
+		if (event.key.key == SDLK_UP || event.key.key == SDLK_DOWN)
+			direction = { 0, 0 };		// si se suelta ↑ o ↓, quedarse quieto
 	}
 }
 
 void Bow::shoot() {
-	Point2D<> start(position.getX(), position.getY() + height / 2);
-
-	game->addArrow(new Arrow(game, game->getTexture(Game::ARROW), start, Vector2D<>(ARROW_SPEED, 0)));
+	Point2D<> start(position.getX() + (WIDTH / 2), position.getY() + (HEIGHT / 2));
+	game->addArrow(new Arrow(game, game->getTexture(Game::ARROW), start, Vector2D<>(Arrow::SPEED, 0)));
 }

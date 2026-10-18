@@ -50,11 +50,6 @@ private:
 
 	bool exit;
 
-	// Elemento del juego
-	// TODO: añadir atributos para los objetos del juego
-	//libera texturas, renderizador y ventana tambien ciera SDL
-	void freeResources();
-
 public:
 	Game();
 	~Game();
