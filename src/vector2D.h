@@ -3,6 +3,7 @@
 
 #include <concepts> //std::floating_point
 #include <cmath> //std::sqrt
+#include <iostream> //std::ostream, para operator<<
 
 
 /**
@@ -56,6 +57,8 @@ public:
 	}
 };
 
+//mismo tipo solo nombre diferente
+//para un punto en lugar de direccion
 template<std::floating_point T = float>
 using Point2D = Vector2D<T>;
 

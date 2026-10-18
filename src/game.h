@@ -10,6 +10,8 @@
 
 // Declaraciones anticipadas
 class Texture;
+class Balloon;
+class Bow;
 
 /**
  * Clase principal del juego.
@@ -29,6 +31,7 @@ public:
 	{
 		BOW = 0,
 		ARROW,
+		BALLOONS,
 		NUM_TEXTURES
 	};
 
@@ -36,6 +39,8 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	std::array<Texture*, NUM_TEXTURES> textures;
+	std::vector<Balloon*> balloons;
+	Bow* bow;
 
 	void render() const;
 	void update();
@@ -45,6 +50,8 @@ private:
 
 	// Elemento del juego
 	// TODO: añadir atributos para los objetos del juego
+	//libera texturas, renderizador y ventana tambien ciera SDL
+	void freeResources();
 
 public:
 	Game();

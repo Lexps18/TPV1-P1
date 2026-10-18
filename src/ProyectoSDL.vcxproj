@@ -97,12 +97,18 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="arrow.cpp" />
+    <ClCompile Include="balloon.cpp" />
+    <ClCompile Include="bow.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="arrow.h" />
+    <ClInclude Include="balloon.h" />
+    <ClInclude Include="bow.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="rectangle.h" />
     <ClInclude Include="texture.h" />
