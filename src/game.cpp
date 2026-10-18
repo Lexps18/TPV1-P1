@@ -7,6 +7,7 @@
 #include "texture.h"
 #include "balloon.h"
 #include "bow.h"
+#include "arrow.h"
 
 using namespace std;
 
@@ -72,7 +73,7 @@ Game::Game()
 	balloons.push_back(new Balloon(getTexture(BALLOONS), Point2D<>(500, WINDOW_HEIGHT), Vector2D<>(0, -200), 3));
 
 	//arco
-	bow = new Bow(getTexture(BOW), INITIAL_ARROWS);
+	bow = new Bow(this, getTexture(BOW), INITIAL_ARROWS);
 }
 
 Game::~Game()
@@ -88,6 +89,11 @@ void Game::freeResources()
 		delete balloon;
 	}
 	balloons.clear();
+
+	for (Arrow* arrow : arrows) {
+		delete arrow;
+	}
+	arrows.clear();
 
 	delete bow;
 	bow = nullptr;
@@ -113,6 +119,10 @@ Game::render() const
 	// TODO
 	bow->render();
 
+	for (Arrow* arrow : arrows) {
+		arrow->render();
+	}
+
 	for (Balloon* balloon : balloons) {
 		balloon->render();
 	}
@@ -127,6 +137,17 @@ Game::update()
 	constexpr float delta = FRAME_PERIOD / 1000.0f;
 
 	bow->update(delta);
+
+	for (size_t i = 0; i < arrows.size(); ) {
+		if (arrows[i]->update(delta)) {
+			++i; //sigue vivo, pasamos al siguiente
+		}
+		else {
+			delete arrows[i]; //1.libera el globo
+			arrows.erase(arrows.begin() + i); //2.quita su puntero del vector
+			//sin ++i, el siguiente globo baja a la posicion i
+		}
+	}
 
 	//recorremos con indice (no con for-each) porque vamos a borrar los elementos
 	for (size_t i = 0; i < balloons.size(); ) {
@@ -173,6 +194,10 @@ Game::handleEvents()
 		// TODO
 		bow->handleEvent(event); 
 	}
+}
+
+void Game::addArrow(Arrow* arrow) {
+	arrows.push_back(arrow);
 }
 
 // bool

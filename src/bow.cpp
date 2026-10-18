@@ -86,6 +86,8 @@ void Bow::onKeyUp(SDL_Keycode key) {
 	}
 }
 
-//void Bow::shoot() {
-//
-//}
+void Bow::shoot() {
+	Point2D<> start(position.getX(), position.getY() + height / 2);
+
+	game->addArrow(new Arrow(game, game->getTexture(Game::ARROW), start, Vector2D<>(ARROW_SPEED, 0)));
+}

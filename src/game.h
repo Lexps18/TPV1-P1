@@ -12,6 +12,7 @@
 class Texture;
 class Balloon;
 class Bow;
+class Arrow;
 
 /**
  * Clase principal del juego.
@@ -41,6 +42,7 @@ private:
 	std::array<Texture*, NUM_TEXTURES> textures;
 	std::vector<Balloon*> balloons;
 	Bow* bow;
+	std::vector<Arrow*> arrows;
 
 	void render() const;
 	void update();
@@ -59,6 +61,9 @@ public:
 
 	// Obtiene una textura por su nombre
 	Texture* getTexture(TextureName name) const;
+
+	//añadir una flecha
+	void addArrow(Arrow* arrow);
 
 	// Ejecuta el bucle principal del juego
 	void run();
