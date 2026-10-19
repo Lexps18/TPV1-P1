@@ -1,4 +1,5 @@
 #include "bow.h"
+#include <iostream>
 #include "texture.h"
 #include "game.h" 
 #include "arrow.h"
@@ -53,14 +54,30 @@ Bow::handleEvent(const SDL_Event& event)
 				loaded = false;
 				arrows--;
 				shoot();
+				std::cout << "Numero de flechas: " << arrows << "\n";
 			}
 			break;
 		}
 	}
-	else if (event.type == SDL_EVENT_KEY_UP) {
-		if (event.key.key == SDLK_UP || event.key.key == SDLK_DOWN)
-			direction = { 0, 0 };		
-	}
+	else if (event.type == SDL_EVENT_KEY_UP)
+		handleKeyUp(event.key.key);		// soltar una tecla va en su propio método
+}
+
+// Al soltar arriba o abajo, sigue hacia la otra si está pulsada, o se para
+void
+Bow::handleKeyUp(SDL_Keycode key)
+{
+	if (key != SDLK_UP && key != SDLK_DOWN)
+		return;	
+
+	// cogemos las teclas pulsadas actualmente
+	const bool* keys = SDL_GetKeyboardState(nullptr);
+	if (keys[SDL_SCANCODE_UP])
+		direction = { 0, -1 };
+	else if (keys[SDL_SCANCODE_DOWN])
+		direction = { 0, 1 };
+	else
+		direction = { 0, 0 };
 }
 
 void Bow::shoot() {
