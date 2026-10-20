@@ -41,12 +41,13 @@ public:
 		return { x * k, y * k };
 	}
 
+
 	// Producto escalar
 	T operator*(const Vector2D& otro) const {
 		return x * otro.x + y * otro.y;
 	}
 
-	Vector2D operator*=(T k) {
+	Vector2D& operator*=(T k) {
 		x *= k;
 		y *= k;
 		return *this;
