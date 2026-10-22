@@ -80,7 +80,13 @@ Bow::handleKeyUp(SDL_Keycode key)
 		direction = { 0, 0 };
 }
 
-void Bow::shoot() {
+void 
+Bow::shoot() {
 	Point2D<> start(position.getX() + (WIDTH / 2), position.getY() + (HEIGHT / 2));
 	game->addArrow(new Arrow(game, game->getTexture(Game::ARROW), start, Vector2D<>(Arrow::SPEED, 0)));
+}
+
+int
+Bow::getArrows() {
+	return arrows;
 }

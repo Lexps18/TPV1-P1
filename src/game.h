@@ -5,14 +5,14 @@
 #include <array>
 #include <istream>
 #include <vector>
-
-// #include "rectangle.h"
+#include <random>
 
 // Declaraciones anticipadas
 class Texture;
 class Balloon;
 class Bow;
 class Arrow;
+class Rectangle;
 
 /**
  * Clase principal del juego.
@@ -27,6 +27,8 @@ public:
 	// Tamaño real de la ventana
 	static constexpr int WINDOW_WIDTH = 800;
 	static constexpr int WINDOW_HEIGHT = 600;
+	// Tiempo entre cada globo
+	static constexpr Uint64 BALLON_DELAY = 1000;
 
 	enum TextureName
 	{
@@ -43,10 +45,18 @@ private:
 	std::vector<Balloon*> balloons;
 	Bow* bow;
 	std::vector<Arrow*> arrows;
+	std::mt19937_64 randomGenerator;
+	Uint64 nextBallonTime;
+
+	// Puntuación jugador
+	int score;
 
 	void render() const;
 	void update();
 	void handleEvents();
+
+	void generateRandomBallon();
+	void renderHitboxes() const;
 
 	bool exit;
 
@@ -64,7 +74,7 @@ public:
 	void run();
 
 	// Comprueba si hay algún objeto colocado en ese rectángulo
-	// bool checkCollision(const Rectangle& rect);
+	bool checkCollision(const Rectangle& rect);
 };
 
 inline Texture*

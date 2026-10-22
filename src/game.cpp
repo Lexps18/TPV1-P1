@@ -8,6 +8,7 @@
 #include "balloon.h"
 #include "bow.h"
 #include "arrow.h"
+#include "rectangle.h"
 
 using namespace std;
 
@@ -17,6 +18,8 @@ constexpr const char* IMAGE_ROOT = "../assets/images/";
 constexpr const char* LEVEL_ROOT = "../assets/levels/";
 
 constexpr int INITIAL_ARROWS = 10;
+constexpr int POINTS_BALLOON = 10;
+constexpr bool SHOW_HITBOXES = true;	// dibuja las cajas de colisión
 
 // Estructura para especificar las texturas que hay que
 // cargar y el tamaño de su matriz de frames
@@ -34,10 +37,13 @@ constexpr array<TextureSpec, Game::NUM_TEXTURES> textureList{
 };
 
 Game::Game()
-  : window(nullptr)
+	: window(nullptr)
 	, renderer(nullptr)
 	, exit(false)
+	, randomGenerator(random_device()())
+	, nextBallonTime(0)
 	, bow(nullptr)
+	
 {
 	// Carga SDL y crea la ventana con su renderizador
 	if (!SDL_Init(SDL_INIT_VIDEO))
@@ -72,11 +78,6 @@ Game::Game()
 
 	// Configura que se pueden utilizar capas translúcidas
 	// SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-
-	//prueb de globos
-	balloons.push_back(new Balloon(getTexture(BALLOONS), Point2D<>(200, WINDOW_HEIGHT), Vector2D<>(0, -100), 0));
-	balloons.push_back(new Balloon(getTexture(BALLOONS), Point2D<>(500, WINDOW_HEIGHT), Vector2D<>(0, -200), 3));
-
 	//arco
 	bow = new Bow(this, getTexture(BOW), { 10, ((WINDOW_HEIGHT - Bow::HEIGHT) / 2)}, INITIAL_ARROWS);
 }
@@ -120,6 +121,9 @@ Game::render() const
 		balloon->render();
 	}
 
+	if (SHOW_HITBOXES)
+		renderHitboxes();
+
 	SDL_RenderPresent(renderer);
 }
 
@@ -128,6 +132,8 @@ Game::update()
 {
 	// Tiempo de un ciclo en segundos (los objetos se mueven a velocidad x delta)
 	constexpr float delta = FRAME_PERIOD / 1000.0f;
+
+	generateRandomBallon();
 
 	bow->update(delta);
 
@@ -141,6 +147,12 @@ Game::update()
 			//sin ++i, el siguiente globo baja a la posicion i
 		}
 	}
+
+	if (arrows.empty() && bow->getArrows() <= 0) {
+		cout << "Se acabo, tu puntuacion es: " << score;
+		exit = true;
+	}
+
 
 	//recorremos con indice (no con for-each) porque vamos a borrar los elementos
 	for (size_t i = 0; i < balloons.size(); ) {
@@ -187,13 +199,49 @@ Game::handleEvents()
 	}
 }
 
-void Game::addArrow(Arrow* arrow) {
+void  
+Game::addArrow(Arrow* arrow) {
 	arrows.push_back(arrow);
 }
 
-// bool
-// Game::checkCollision(const Rectangle& rect)
-// {
-//	// TODO
-//	return false;
-// }
+void
+Game::generateRandomBallon() {
+
+	if (SDL_GetTicks() < nextBallonTime)
+		return;
+
+	nextBallonTime = SDL_GetTicks() + BALLON_DELAY;
+	float pos_x = uniform_real_distribution<float>(150.0f, 736.0f)(randomGenerator);
+	float vel_y = uniform_real_distribution<float>(50.0f, 200.0f)(randomGenerator);
+	int color = uniform_int_distribution<int>(0, 6)(randomGenerator);
+
+	balloons.push_back(new Balloon(getTexture(BALLOONS), Point2D<>(pos_x, WINDOW_HEIGHT), Vector2D<>(0, -vel_y), color));
+}
+
+bool
+Game::checkCollision(const Rectangle& rect) {
+	for (Balloon* balloon : balloons) {
+		if (balloon->hit(rect)) {
+			score += POINTS_BALLOON;
+			cout << "PUNTOS: " << score << endl;
+			return true;
+		}
+	}
+	return false;
+}
+
+void
+Game::renderHitboxes() const
+{
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);	
+
+	for (Arrow* arrow : arrows) {
+		SDL_FRect rect = arrow->getTip().to_sdl();
+		SDL_RenderRect(renderer, &rect);
+	}
+
+	for (Balloon* balloon : balloons) {
+		SDL_FRect rect = balloon->getRect().to_sdl();
+		SDL_RenderRect(renderer, &rect);
+	}
+}

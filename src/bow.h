@@ -30,4 +30,6 @@ public:
 	bool update(float delta);
 	void handleEvent(const SDL_Event& event);
 	void handleKeyUp(SDL_Keycode key);
+
+	int getArrows();
 };

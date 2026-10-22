@@ -1,6 +1,7 @@
 #include "arrow.h"
 #include "game.h"
 #include "texture.h"
+#include "rectangle.h"
 
 Arrow::Arrow(Game* game, Texture* texture, Point2D<> start, Vector2D<> velocity)
 	: game(game)
@@ -26,7 +27,14 @@ Arrow::update(float delta)
 	position += velocity * delta;
 
 	// TODO comprobar colisión 
+	game->checkCollision(getTip());
 
 	// Sigue viva mientras su borde izquierdo no haya pasado el borde derecho de la ventana
 	return position.getX() < Game::WINDOW_WIDTH;
+}
+
+Rectangle
+Arrow::getTip() const
+{
+	return Rectangle({ position.getX() + WIDTH - TIP_WIDTH, position.getY() }, TIP_WIDTH, height);
 }
