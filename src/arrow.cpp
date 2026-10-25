@@ -26,7 +26,6 @@ Arrow::update(float delta)
 {
 	position += velocity * delta;
 
-	// TODO comprobar colisión 
 	game->checkCollision(getTip());
 
 	// Sigue viva mientras su borde izquierdo no haya pasado el borde derecho de la ventana

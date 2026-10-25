@@ -52,10 +52,11 @@ Game::Game()
 	, nextBallonTime(0)
 	, initialArrows(0)
 	, balloonDelay(0)
-	, score(0)
-	, exit(false)
+	, infoBar(nullptr)
 	, balloonPoints(POINTS_BALLOON)
 	, backgroundColor(DEFAULT_BG_COLOR)
+	, score(0)
+	, exit(false)
 	
 {
 	// Lee la configuración lo primero: si falla, aún no hay nada que liberar
@@ -92,7 +93,7 @@ Game::Game()
 		throw;
 	}
 	//arco
-	bow = new Bow(this, getTexture(BOW), { 10, ((WINDOW_HEIGHT - Bow::HEIGHT) / 2)}, initialArrows);
+	bow = new Bow(this, getTexture(BOW), { BOW_X, ((WINDOW_HEIGHT - Bow::HEIGHT) / 2)}, initialArrows);
 
 	//infobar
 	infoBar = new InfoBar(this, getTexture(ARROW), renderer);
@@ -113,9 +114,8 @@ Game::~Game()
 	}
 
 	// Liberar cada textura
-	for (int i = 0; i < textures.size(); i++) {
-		delete textures[i];
-	}
+	for (Texture* texture : textures)
+		delete texture;
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -149,7 +149,7 @@ Game::render() const
 void
 Game::update()
 {
-	// Tiempo de un ciclo en segundos (los objetos se mueven a velocidad x delta)
+	// Tiempo de un ciclo en segundos 
 	constexpr float delta = FRAME_PERIOD / 1000.0f;
 
 	generateRandomBallon();
@@ -168,7 +168,7 @@ Game::update()
 	}
 
 	if (arrows.empty() && bow->getArrows() <= 0) {
-		cout << "Se acabo, tu puntuacion es: " << score;
+		cout << "Se acabo, tu puntuacion es: " << score << endl;
 		exit = true;
 	}
 
@@ -269,7 +269,7 @@ void
 Game::loadConfig(const string& filename) {
 	ifstream file(filename);
 	if (!file)
-		throw "No se encontro el archivo de configuración: "s + filename;
+		throw "No se encontro el archivo de configuracion: "s + filename;
 
 	string key;
 	while(file >> key) {
@@ -280,7 +280,7 @@ Game::loadConfig(const string& filename) {
 		else if (key == "balpoints")
 			file >> balloonPoints;
 		else if (key == "bgcolor") {
-			int r = 0, g = 0, b = 0;	// leídos como int: un Uint8 se leería como carácter
+			int r = 0, g = 0, b = 0;	// leídos como int
 			file >> r >> g >> b;
 			backgroundColor = { Uint8(r), Uint8(g), Uint8(b), SDL_ALPHA_OPAQUE };
 		}

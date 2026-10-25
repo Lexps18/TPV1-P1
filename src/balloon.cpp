@@ -3,7 +3,7 @@
 #include "rectangle.h"
 
 Balloon::Balloon(Texture* texture, Point2D<> position, Vector2D<> velocity, int color) 
-	: texture(texture), position(position), color(color), velocity(velocity), frame(0), explosionTime(0)
+	: texture(texture), position(position), velocity(velocity), color(color), frame(0), explosionTime(0)
 {
 }
 
