@@ -45,5 +45,5 @@ Balloon::hit(const Rectangle& obj) {
 Rectangle
 Balloon::getRect() const
 {
-	return Rectangle({position.getX() + SIZE/4, position.getY()}, SIZE/2, SIZE);
+	return Rectangle({position.getX() + (SIZE - HITBOX_WIDTH) / 2, position.getY()}, HITBOX_WIDTH, SIZE);
 }

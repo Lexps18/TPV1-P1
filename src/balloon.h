@@ -9,6 +9,7 @@ class Balloon
 {
 public:
 	static constexpr float SIZE = 64;
+	static constexpr float HITBOX_WIDTH = SIZE / 2;	// más estrecha que la imagen, que tiene bordes transparentes
 	static constexpr float EXPLOSION_FRAME_TIME = 0.08f;
 
 private:

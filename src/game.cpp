@@ -11,7 +11,7 @@
 #include "bow.h"
 #include "arrow.h"
 #include "rectangle.h"
-#include "infobar.h"
+#include "InfoBar.h"
 
 using namespace std;
 
@@ -28,6 +28,7 @@ constexpr float BOW_X = 10;			// distancia del arco al borde izquierdo
 constexpr float BALLOON_MIN_X = 150;		// para que los globos no salgan encima del arco
 constexpr float BALLOON_MIN_SPEED = 50;		// en píxeles por segundo
 constexpr float BALLOON_MAX_SPEED = 200;
+constexpr float MS_PER_SECOND = 1000.0f;	// para pasar de milisegundos a segundos
 
 // Estructura para especificar las texturas que hay que
 // cargar y el tamaño de su matriz de frames
@@ -150,7 +151,7 @@ void
 Game::update()
 {
 	// Tiempo de un ciclo en segundos 
-	constexpr float delta = FRAME_PERIOD / 1000.0f;
+	constexpr float delta = FRAME_PERIOD / MS_PER_SECOND;
 
 	generateRandomBallon();
 
@@ -201,7 +202,7 @@ Game::run()
 		//si el ciclo ha tardado menos de Frame_Period, esperar
 		Uint64 frameTime = SDL_GetTicks() - frameStart;
 		if (frameTime < FRAME_PERIOD) {
-			SDL_Delay(static_cast<Uint32>(FRAME_PERIOD - frameTime));
+			SDL_Delay(Uint32(FRAME_PERIOD - frameTime));
 		}
 	}
 }

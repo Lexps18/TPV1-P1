@@ -87,6 +87,6 @@ Bow::shoot() {
 }
 
 int
-Bow::getArrows() {
+Bow::getArrows() const {
 	return arrows;
 }
