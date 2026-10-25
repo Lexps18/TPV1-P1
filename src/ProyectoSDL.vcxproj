@@ -101,6 +101,7 @@
     <ClCompile Include="balloon.cpp" />
     <ClCompile Include="bow.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="InfoBar.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -110,6 +111,7 @@
     <ClInclude Include="balloon.h" />
     <ClInclude Include="bow.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="InfoBar.h" />
     <ClInclude Include="rectangle.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="vector2D.h" />

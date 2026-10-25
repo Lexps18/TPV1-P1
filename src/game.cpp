@@ -1,6 +1,8 @@
 #include "game.h"
 
 #include <string>
+#include <fstream>
+#include <limits>
 
 #include <SDL3_image/SDL_image.h>
 
@@ -9,6 +11,7 @@
 #include "bow.h"
 #include "arrow.h"
 #include "rectangle.h"
+#include "infobar.h"
 
 using namespace std;
 
@@ -16,10 +19,15 @@ using namespace std;
 constexpr const char* const WINDOW_TITLE = "Bow & Arrow 1.0";
 constexpr const char* IMAGE_ROOT = "../assets/images/";
 constexpr const char* LEVEL_ROOT = "../assets/levels/";
+constexpr const char* LEVEL_FILE = "1.txt";
 
-constexpr int INITIAL_ARROWS = 10;
 constexpr int POINTS_BALLOON = 10;
-constexpr bool SHOW_HITBOXES = true;	// dibuja las cajas de colisión
+constexpr SDL_Color DEFAULT_BG_COLOR = { 0, 170, 85, SDL_ALPHA_OPAQUE };	
+constexpr bool SHOW_HITBOXES = false;	// dibuja las cajas de colisión
+constexpr float BOW_X = 10;			// distancia del arco al borde izquierdo
+constexpr float BALLOON_MIN_X = 150;		// para que los globos no salgan encima del arco
+constexpr float BALLOON_MIN_SPEED = 50;		// en píxeles por segundo
+constexpr float BALLOON_MAX_SPEED = 200;
 
 // Estructura para especificar las texturas que hay que
 // cargar y el tamaño de su matriz de frames
@@ -39,12 +47,20 @@ constexpr array<TextureSpec, Game::NUM_TEXTURES> textureList{
 Game::Game()
 	: window(nullptr)
 	, renderer(nullptr)
-	, exit(false)
+	, bow(nullptr)
 	, randomGenerator(random_device()())
 	, nextBallonTime(0)
-	, bow(nullptr)
+	, initialArrows(0)
+	, balloonDelay(0)
+	, score(0)
+	, exit(false)
+	, balloonPoints(POINTS_BALLOON)
+	, backgroundColor(DEFAULT_BG_COLOR)
 	
 {
+	// Lee la configuración lo primero: si falla, aún no hay nada que liberar
+	loadConfig(string(LEVEL_ROOT) + LEVEL_FILE);
+
 	// Carga SDL y crea la ventana con su renderizador
 	if (!SDL_Init(SDL_INIT_VIDEO))
 		throw "SDL_Init: "s + SDL_GetError();
@@ -75,17 +91,18 @@ Game::Game()
 
 		throw;
 	}
-
-	// Configura que se pueden utilizar capas translúcidas
-	// SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	//arco
-	bow = new Bow(this, getTexture(BOW), { 10, ((WINDOW_HEIGHT - Bow::HEIGHT) / 2)}, INITIAL_ARROWS);
+	bow = new Bow(this, getTexture(BOW), { 10, ((WINDOW_HEIGHT - Bow::HEIGHT) / 2)}, initialArrows);
+
+	//infobar
+	infoBar = new InfoBar(this, getTexture(ARROW), renderer);
 }
 
 Game::~Game()
 {
 	// Liberar los objetos libres
 	delete bow;
+	delete infoBar;
 
 	for (Balloon* balloon : balloons) {
 		delete balloon;
@@ -108,7 +125,7 @@ Game::~Game()
 void
 Game::render() const
 {
-	SDL_SetRenderDrawColor(renderer, 0, 170, 85, 255);    // fondo verde
+	SDL_SetRenderDrawColor(renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	SDL_RenderClear(renderer);
 
 	bow->render();
@@ -123,6 +140,8 @@ Game::render() const
 
 	if (SHOW_HITBOXES)
 		renderHitboxes();
+
+	infoBar->render();
 
 	SDL_RenderPresent(renderer);
 }
@@ -210,10 +229,10 @@ Game::generateRandomBallon() {
 	if (SDL_GetTicks() < nextBallonTime)
 		return;
 
-	nextBallonTime = SDL_GetTicks() + BALLON_DELAY;
-	float pos_x = uniform_real_distribution<float>(150.0f, 736.0f)(randomGenerator);
-	float vel_y = uniform_real_distribution<float>(50.0f, 200.0f)(randomGenerator);
-	int color = uniform_int_distribution<int>(0, 6)(randomGenerator);
+	nextBallonTime = SDL_GetTicks() + balloonDelay;
+	float pos_x = uniform_real_distribution<float>(BALLOON_MIN_X, WINDOW_WIDTH - Balloon::SIZE)(randomGenerator);
+	float vel_y = uniform_real_distribution<float>(BALLOON_MIN_SPEED, BALLOON_MAX_SPEED)(randomGenerator);
+	int color = uniform_int_distribution<int>(0, getTexture(BALLOONS)->getNumRows() - 1)(randomGenerator);
 
 	balloons.push_back(new Balloon(getTexture(BALLOONS), Point2D<>(pos_x, WINDOW_HEIGHT), Vector2D<>(0, -vel_y), color));
 }
@@ -222,7 +241,7 @@ bool
 Game::checkCollision(const Rectangle& rect) {
 	for (Balloon* balloon : balloons) {
 		if (balloon->hit(rect)) {
-			score += POINTS_BALLOON;
+			score += balloonPoints;
 			cout << "PUNTOS: " << score << endl;
 			return true;
 		}
@@ -244,4 +263,43 @@ Game::renderHitboxes() const
 		SDL_FRect rect = balloon->getRect().to_sdl();
 		SDL_RenderRect(renderer, &rect);
 	}
+}
+
+void
+Game::loadConfig(const string& filename) {
+	ifstream file(filename);
+	if (!file)
+		throw "No se encontro el archivo de configuración: "s + filename;
+
+	string key;
+	while(file >> key) {
+		if (key == "arrows")
+			file >> initialArrows;
+		else if (key == "baldelay")
+			file >> balloonDelay;
+		else if (key == "balpoints")
+			file >> balloonPoints;
+		else if (key == "bgcolor") {
+			int r = 0, g = 0, b = 0;	// leídos como int: un Uint8 se leería como carácter
+			file >> r >> g >> b;
+			backgroundColor = { Uint8(r), Uint8(g), Uint8(b), SDL_ALPHA_OPAQUE };
+		}
+		else
+			file.ignore(numeric_limits<streamsize>::max(), '\n');
+
+		if (!file)	// no había un número donde tocaba
+			throw "Formato erroneo en "s + filename + " (opcion " + key + ")";
+	}
+}
+
+int 
+Game::getScore() const
+{
+	return score;
+}
+
+int 
+Game::getArrowsLeft() const
+{
+	return bow->getArrows();
 }

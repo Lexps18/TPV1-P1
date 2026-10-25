@@ -1,0 +1,8 @@
+Autores: Adrián Arbas Perdiguero y Alexia Pérez Santana
+
+Funcionalidades opcionales:
+- Opcional 1: clase InfoBar que muestra las flechas restantes y la puntuación en la ventana.
+- Opcional 2: se leen también las opciones bgcolor y balpoints del archivo de configuración.
+
+Cosas que no funcionan:
+- Ninguna conocida

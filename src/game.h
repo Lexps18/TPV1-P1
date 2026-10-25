@@ -6,6 +6,7 @@
 #include <istream>
 #include <vector>
 #include <random>
+#include <string>
 
 // Declaraciones anticipadas
 class Texture;
@@ -13,6 +14,7 @@ class Balloon;
 class Bow;
 class Arrow;
 class Rectangle;
+class InfoBar;
 
 /**
  * Clase principal del juego.
@@ -27,8 +29,6 @@ public:
 	// Tamaño real de la ventana
 	static constexpr int WINDOW_WIDTH = 800;
 	static constexpr int WINDOW_HEIGHT = 600;
-	// Tiempo entre cada globo
-	static constexpr Uint64 BALLON_DELAY = 1000;
 
 	enum TextureName
 	{
@@ -47,6 +47,11 @@ private:
 	std::vector<Arrow*> arrows;
 	std::mt19937_64 randomGenerator;
 	Uint64 nextBallonTime;
+	int initialArrows;
+	Uint64 balloonDelay;
+	InfoBar* infoBar;	// barra con flechas y puntuación
+	int balloonPoints;
+	SDL_Color backgroundColor;
 
 	// Puntuación jugador
 	int score;
@@ -56,6 +61,9 @@ private:
 	void handleEvents();
 
 	void generateRandomBallon();
+	// Lee las opciones del archivo de configuración
+	void loadConfig(const std::string& filename);
+
 	void renderHitboxes() const;
 
 	bool exit;
@@ -75,6 +83,10 @@ public:
 
 	// Comprueba si hay algún objeto colocado en ese rectángulo
 	bool checkCollision(const Rectangle& rect);
+
+	// Datos que muestra la barra de información
+	int getScore() const;
+	int getArrowsLeft() const;
 };
 
 inline Texture*
