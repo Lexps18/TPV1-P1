@@ -156,13 +156,14 @@ Game::update()
 
 	bow->update(delta);
 
+	//recorremos con indice porque vamos a borrar los elementos
 	for (size_t i = 0; i < arrows.size(); ) {
 		if (arrows[i]->update(delta)) {
 			++i; //sigue vivo, pasamos al siguiente
 		}
 		else {
-			delete arrows[i]; //1.libera el globo
-			arrows.erase(arrows.begin() + i); //2.quita su puntero del vector
+			delete arrows[i]; // libera el globo
+			arrows.erase(arrows.begin() + i); // quita su puntero del vector
 			//sin ++i, el siguiente globo baja a la posicion i
 		}
 	}
@@ -173,15 +174,15 @@ Game::update()
 	}
 
 
-	//recorremos con indice (no con for-each) porque vamos a borrar los elementos
+	
 	for (size_t i = 0; i < balloons.size(); ) {
 		if (balloons[i]->update(delta)) {
-			++i; //sigue vivo, pasamos al siguiente
+			++i;
 		}
 		else {
-			delete balloons[i]; //1.libera el globo
-			balloons.erase(balloons.begin() + i); //2.quita su puntero del vector
-			//sin ++i, el siguiente globo baja a la posicion i
+			delete balloons[i]; 
+			balloons.erase(balloons.begin() + i); 
+			
 		}
 	}
 }
