@@ -2,9 +2,9 @@
 #include "texture.h"
 #include "rectangle.h"
 
-Balloon::Balloon(Game* game, Texture* texture, Point2D<> position, Vector2D<> velocity, int color) 
+Balloon::Balloon(Game* game, Texture* texture, Point2D<> position, Vector2D<> velocity, int color, int balloon_points) 
 	: MobileObject(game, texture, position, SIZE, SIZE, velocity), 
-	color(color), frame(0), explosionTime(0)
+	color(color), frame(0), explosionTime(0), balloon_points(balloon_points)
 {
 }
 
@@ -47,4 +47,9 @@ Rectangle
 Balloon::getRect() const
 {
 	return Rectangle({position.getX() + (SIZE - HITBOX_WIDTH) / 2, position.getY()}, HITBOX_WIDTH, SIZE);
+}
+
+int
+Balloon::getPoints() {
+	return balloon_points;
 }

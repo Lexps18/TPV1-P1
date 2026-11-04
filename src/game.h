@@ -34,6 +34,7 @@ public:
 		BOW = 0,
 		ARROW,
 		BALLOONS,
+		BUTTERFLY,
 		NUM_TEXTURES
 	};
 
@@ -48,8 +49,8 @@ private:
 	Uint64 nextBallonTime;
 	int initialArrows;
 	Uint64 balloonDelay;
-	InfoBar* infoBar;	// barra con flechas y puntuación
 	int balloonPoints;
+	InfoBar* infoBar;	// barra con flechas y puntuación
 	SDL_Color backgroundColor;
 
 	// Puntuación jugador
@@ -60,6 +61,7 @@ private:
 	void handleEvents();
 
 	void generateRandomBallon();
+	void generateRandomButterfly(int numButterfly);
 	// Lee las opciones del archivo de configuración
 	void loadConfig(const std::string& filename);
 
@@ -90,6 +92,9 @@ public:
 	// Datos que muestra la barra de información
 	int getScore() const;
 	int getArrowsLeft() const;
+
+	// Número real aleatorio entre min y max
+	float getRandom(float min, float max);
 };
 
 inline Texture*

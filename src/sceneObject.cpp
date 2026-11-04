@@ -8,3 +8,8 @@ bool
 SceneObject::hit(const Rectangle&) {
 	return false;
 }
+
+int
+SceneObject::getPoints() {
+	return 0;
+}

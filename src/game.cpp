@@ -12,6 +12,7 @@
 #include "arrow.h"
 #include "rectangle.h"
 #include "InfoBar.h"
+#include "Butterfly.h"
 
 using namespace std;
 
@@ -21,13 +22,13 @@ constexpr const char* IMAGE_ROOT = "../assets/images/";
 constexpr const char* LEVEL_ROOT = "../assets/levels/";
 constexpr const char* LEVEL_FILE = "1.txt";
 
-constexpr int POINTS_BALLOON = 10;
 constexpr SDL_Color DEFAULT_BG_COLOR = { 0, 170, 85, SDL_ALPHA_OPAQUE };	
 constexpr float BOW_X = 10;			// distancia del arco al borde izquierdo
 constexpr float BALLOON_MIN_X = 150;		// para que los globos no salgan encima del arco
 constexpr float BALLOON_MIN_SPEED = 50;		// en píxeles por segundo
 constexpr float BALLOON_MAX_SPEED = 200;
 constexpr float MS_PER_SECOND = 1000.0f;	// para pasar de milisegundos a segundos
+constexpr float BUTTERFLY_MIN_X = 150;	
 
 // Estructura para especificar las texturas que hay que
 // cargar y el tamaño de su matriz de frames
@@ -42,6 +43,7 @@ constexpr array<TextureSpec, Game::NUM_TEXTURES> textureList{
 	TextureSpec{"bow.png", 1, 2},
 	{"arrow.png"},
 	{"balloons.png", 7, 6},
+	{"butterfly.png", 4, 10}	
 };
 
 Game::Game()
@@ -53,8 +55,8 @@ Game::Game()
 	, nextBallonTime(0)
 	, initialArrows(0)
 	, balloonDelay(0)
+	, balloonPoints(0)
 	, infoBar(nullptr)
-	, balloonPoints(POINTS_BALLOON)
 	, backgroundColor(DEFAULT_BG_COLOR)
 	, score(0)
 	, exit(false)
@@ -96,6 +98,9 @@ Game::Game()
 	//arco
 	bow = new Bow(this, getTexture(BOW), { BOW_X, ((WINDOW_HEIGHT - Bow::HEIGHT) / 2)}, initialArrows);
 	objects.push_back(bow);
+
+	//mariposas
+	generateRandomButterfly(5);
 
 	//infobar
 	infoBar = new InfoBar(this, getTexture(ARROW), renderer);
@@ -217,14 +222,24 @@ Game::generateRandomBallon() {
 	float vel_y = uniform_real_distribution<float>(BALLOON_MIN_SPEED, BALLOON_MAX_SPEED)(randomGenerator);
 	int color = uniform_int_distribution<int>(0, getTexture(BALLOONS)->getNumRows() - 1)(randomGenerator);
 
-	objects.push_back(new Balloon(this, getTexture(BALLOONS), Point2D<>(pos_x, WINDOW_HEIGHT), Vector2D<>(0, -vel_y), color));
+	objects.push_back(new Balloon(this, getTexture(BALLOONS), Point2D<>(pos_x, WINDOW_HEIGHT), Vector2D<>(0, -vel_y), color, balloonPoints));
+}
+
+void
+Game::generateRandomButterfly(int numButterfly) {
+	for (int i = 0; i < numButterfly; i++) {
+		float pos_x = uniform_real_distribution<float>(BUTTERFLY_MIN_X, WINDOW_WIDTH - Butterfly::SIZE)(randomGenerator);
+		float pos_y = uniform_real_distribution<float>(0, WINDOW_HEIGHT - Butterfly::SIZE)(randomGenerator);
+
+		objects.push_back(new Butterfly(this, getTexture(BUTTERFLY), Point2D<>(pos_x, pos_y), Vector2D<>(0, 0)));
+	}
 }
 
 bool
 Game::checkCollision(const Rectangle& rect) {
 	for (SceneObject* object : objects) {
 		if (object->hit(rect)) {
-			score += balloonPoints;
+			score += object->getPoints();
 			cout << "PUNTOS: " << score << endl;
 			return true;
 		}
@@ -287,4 +302,10 @@ int
 Game::getArrowsLeft() const
 {
 	return bow->getArrows();
+}
+
+float
+Game::getRandom(float min, float max)
+{
+	return uniform_real_distribution<float>(min, max)(randomGenerator);
 }

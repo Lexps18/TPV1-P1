@@ -15,13 +15,15 @@ private:
 	int color;
 	int frame;
 	float explosionTime;
+	int balloon_points;
 
 public:
-	Balloon(Game* game, Texture* texture, Point2D<> position, Vector2D<> velocity, int color);
+	Balloon(Game* game, Texture* texture, Point2D<> position, Vector2D<> velocity, int color, int balloon_points);
 
 	void render() const override;
 	bool update(float delta) override;
 	bool hit(const Rectangle&) override;
+	int getPoints() override;
 
 	// Rectángulo que ocupa el globo
 	Rectangle getRect() const;

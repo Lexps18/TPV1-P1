@@ -100,6 +100,7 @@
     <ClCompile Include="arrow.cpp" />
     <ClCompile Include="balloon.cpp" />
     <ClCompile Include="bow.cpp" />
+    <ClCompile Include="butterfly.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gameObject.cpp" />
     <ClCompile Include="InfoBar.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="arrow.h" />
     <ClInclude Include="balloon.h" />
     <ClInclude Include="bow.h" />
+    <ClInclude Include="butterfly.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="gameObject.h" />
     <ClInclude Include="InfoBar.h" />
