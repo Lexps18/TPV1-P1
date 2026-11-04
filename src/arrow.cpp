@@ -4,13 +4,15 @@
 #include "rectangle.h"
 
 Arrow::Arrow(Game* game, Texture* texture, Point2D<> start, Vector2D<> velocity)
-	: game(game)
-	, texture(texture)
-	, width(WIDTH)
-	, height(WIDTH * texture->getFrameHeight() / texture->getFrameWidth())
-	, position(start.getX(), start.getY() - height / 2)   // centrada en vertical
-	, velocity(velocity)
+	: MobileObject(game, texture, start, WIDTH, WIDTH / texture->getAspectRatio(), velocity)
 {
+	position = position - Vector2D<>(0, height / 2);
+	game->arrowCreated();	// el juego lleva la cuenta de las flechas en vuelo
+}
+
+Arrow::~Arrow()
+{
+	game->arrowDestroyed();
 }
 
 void
@@ -24,7 +26,7 @@ Arrow::render() const
 bool
 Arrow::update(float delta)
 {
-	position += velocity * delta;
+	MobileObject::update(delta);
 
 	game->checkCollision(getTip());
 

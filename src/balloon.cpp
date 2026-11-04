@@ -2,8 +2,9 @@
 #include "texture.h"
 #include "rectangle.h"
 
-Balloon::Balloon(Texture* texture, Point2D<> position, Vector2D<> velocity, int color) 
-	: texture(texture), position(position), velocity(velocity), color(color), frame(0), explosionTime(0)
+Balloon::Balloon(Game* game, Texture* texture, Point2D<> position, Vector2D<> velocity, int color) 
+	: MobileObject(game, texture, position, SIZE, SIZE, velocity), 
+	color(color), frame(0), explosionTime(0)
 {
 }
 
@@ -17,7 +18,7 @@ Balloon::render() const {
 
 bool 
 Balloon::update(float delta) {
-	position += velocity * delta;
+	MobileObject::update(delta);
 
 	if (frame > 0) {
 		explosionTime += delta;

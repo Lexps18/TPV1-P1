@@ -5,7 +5,7 @@
 #include "arrow.h"
 
 Bow::Bow(Game* game, Texture* texture, Point2D<> position, int numArrows)
-	: game(game), texture(texture), position(position),	direction (0, 0), arrows(numArrows), loaded(false)
+	: SceneObject(game, texture, position, WIDTH, HEIGHT), direction (0, 0), arrows(numArrows), loaded(false)
 {
 }
 
@@ -37,14 +37,17 @@ Bow::update(float delta) {
 void 
 Bow::handleEvent(const SDL_Event& event) 
 {
+	// cogemos las teclas pulsadas actualmente
+	const bool* keys = SDL_GetKeyboardState(nullptr);
+	if (keys[SDL_SCANCODE_UP])
+		direction = { 0, -1 };
+	else if (keys[SDL_SCANCODE_DOWN])
+		direction = { 0, 1 };
+	else
+		direction = { 0, 0 };
+
 	if (event.type == SDL_EVENT_KEY_DOWN) {
 		switch (event.key.key) {
-		case SDLK_UP:
-			direction = { 0, -1 };		// dirección arriba
-			break;
-		case SDLK_DOWN:
-			direction = { 0, 1 };		// dirección abajo
-			break;
 		case SDLK_LEFT:
 			if (arrows > 0)
 				loaded = true;			// cargar, solo si quedan flechas
@@ -59,31 +62,12 @@ Bow::handleEvent(const SDL_Event& event)
 			break;
 		}
 	}
-	else if (event.type == SDL_EVENT_KEY_UP)
-		handleKeyUp(event.key.key);		// soltar una tecla va en su propio método
-}
-
-// Al soltar arriba o abajo, sigue hacia la otra si está pulsada, o se para
-void
-Bow::handleKeyUp(SDL_Keycode key)
-{
-	if (key != SDLK_UP && key != SDLK_DOWN)
-		return;	
-
-	// cogemos las teclas pulsadas actualmente
-	const bool* keys = SDL_GetKeyboardState(nullptr);
-	if (keys[SDL_SCANCODE_UP])
-		direction = { 0, -1 };
-	else if (keys[SDL_SCANCODE_DOWN])
-		direction = { 0, 1 };
-	else
-		direction = { 0, 0 };
 }
 
 void 
 Bow::shoot() {
 	Point2D<> start(position.getX() + (WIDTH / 2), position.getY() + (HEIGHT / 2));
-	game->addArrow(new Arrow(game, game->getTexture(Game::ARROW), start, Vector2D<>(Arrow::SPEED, 0)));
+	game->addObject(new Arrow(game, game->getTexture(Game::ARROW), start, Vector2D<>(Arrow::SPEED, 0)));
 }
 
 int

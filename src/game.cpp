@@ -23,7 +23,6 @@ constexpr const char* LEVEL_FILE = "1.txt";
 
 constexpr int POINTS_BALLOON = 10;
 constexpr SDL_Color DEFAULT_BG_COLOR = { 0, 170, 85, SDL_ALPHA_OPAQUE };	
-constexpr bool SHOW_HITBOXES = false;	// dibuja las cajas de colisión
 constexpr float BOW_X = 10;			// distancia del arco al borde izquierdo
 constexpr float BALLOON_MIN_X = 150;		// para que los globos no salgan encima del arco
 constexpr float BALLOON_MIN_SPEED = 50;		// en píxeles por segundo
@@ -49,6 +48,7 @@ Game::Game()
 	: window(nullptr)
 	, renderer(nullptr)
 	, bow(nullptr)
+	, arrowsInFlight(0)
 	, randomGenerator(random_device()())
 	, nextBallonTime(0)
 	, initialArrows(0)
@@ -95,6 +95,7 @@ Game::Game()
 	}
 	//arco
 	bow = new Bow(this, getTexture(BOW), { BOW_X, ((WINDOW_HEIGHT - Bow::HEIGHT) / 2)}, initialArrows);
+	objects.push_back(bow);
 
 	//infobar
 	infoBar = new InfoBar(this, getTexture(ARROW), renderer);
@@ -102,17 +103,10 @@ Game::Game()
 
 Game::~Game()
 {
-	// Liberar los objetos libres
-	delete bow;
 	delete infoBar;
 
-	for (Balloon* balloon : balloons) {
-		delete balloon;
-	}
-
-	for (Arrow* arrow : arrows) {
-		delete arrow;
-	}
+	for (SceneObject* object : objects)
+		delete object;
 
 	// Liberar cada textura
 	for (Texture* texture : textures)
@@ -129,18 +123,8 @@ Game::render() const
 	SDL_SetRenderDrawColor(renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	SDL_RenderClear(renderer);
 
-	bow->render();
-
-	for (Arrow* arrow : arrows) {
-		arrow->render();
-	}
-
-	for (Balloon* balloon : balloons) {
-		balloon->render();
-	}
-
-	if (SHOW_HITBOXES)
-		renderHitboxes();
+	for (SceneObject* object : objects)
+		object->render();
 
 	infoBar->render();
 
@@ -157,34 +141,19 @@ Game::update()
 
 	bow->update(delta);
 
-	//recorremos con indice porque vamos a borrar los elementos
-	for (size_t i = 0; i < arrows.size(); ) {
-		if (arrows[i]->update(delta)) {
-			++i; //sigue vivo, pasamos al siguiente
+	for (auto it = objects.begin(); it != objects.end(); ) {
+		if ((*it)->update(delta)) {
+			++it;
 		}
 		else {
-			delete arrows[i]; // libera el globo
-			arrows.erase(arrows.begin() + i); // quita su puntero del vector
-			//sin ++i, el siguiente globo baja a la posicion i
+			delete* it;
+			it = objects.erase(it);
 		}
 	}
 
-	if (arrows.empty() && bow->getArrows() <= 0) {
+	if (bow->getArrows() <= 0 && arrowsInFlight == 0) {
 		cout << "Se acabo, tu puntuacion es: " << score << endl;
 		exit = true;
-	}
-
-
-	
-	for (size_t i = 0; i < balloons.size(); ) {
-		if (balloons[i]->update(delta)) {
-			++i;
-		}
-		else {
-			delete balloons[i]; 
-			balloons.erase(balloons.begin() + i); 
-			
-		}
 	}
 }
 
@@ -221,8 +190,20 @@ Game::handleEvents()
 }
 
 void  
-Game::addArrow(Arrow* arrow) {
-	arrows.push_back(arrow);
+Game::addObject(SceneObject* object) {
+	objects.push_back(object);
+}
+
+void
+Game::arrowCreated()
+{
+	arrowsInFlight++;
+}
+
+void
+Game::arrowDestroyed()
+{
+	arrowsInFlight--;
 }
 
 void
@@ -236,13 +217,13 @@ Game::generateRandomBallon() {
 	float vel_y = uniform_real_distribution<float>(BALLOON_MIN_SPEED, BALLOON_MAX_SPEED)(randomGenerator);
 	int color = uniform_int_distribution<int>(0, getTexture(BALLOONS)->getNumRows() - 1)(randomGenerator);
 
-	balloons.push_back(new Balloon(getTexture(BALLOONS), Point2D<>(pos_x, WINDOW_HEIGHT), Vector2D<>(0, -vel_y), color));
+	objects.push_back(new Balloon(this, getTexture(BALLOONS), Point2D<>(pos_x, WINDOW_HEIGHT), Vector2D<>(0, -vel_y), color));
 }
 
 bool
 Game::checkCollision(const Rectangle& rect) {
-	for (Balloon* balloon : balloons) {
-		if (balloon->hit(rect)) {
+	for (SceneObject* object : objects) {
+		if (object->hit(rect)) {
 			score += balloonPoints;
 			cout << "PUNTOS: " << score << endl;
 			return true;
@@ -251,6 +232,7 @@ Game::checkCollision(const Rectangle& rect) {
 	return false;
 }
 
+/*
 void
 Game::renderHitboxes() const
 {
@@ -266,6 +248,7 @@ Game::renderHitboxes() const
 		SDL_RenderRect(renderer, &rect);
 	}
 }
+*/
 
 void
 Game::loadConfig(const string& filename) {

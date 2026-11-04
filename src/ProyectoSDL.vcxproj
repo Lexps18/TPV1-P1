@@ -101,9 +101,12 @@
     <ClCompile Include="balloon.cpp" />
     <ClCompile Include="bow.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="gameObject.cpp" />
     <ClCompile Include="InfoBar.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mobileObject.cpp" />
     <ClCompile Include="rectangle.cpp" />
+    <ClCompile Include="sceneObject.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -111,8 +114,11 @@
     <ClInclude Include="balloon.h" />
     <ClInclude Include="bow.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="gameObject.h" />
     <ClInclude Include="InfoBar.h" />
+    <ClInclude Include="mobileObject.h" />
     <ClInclude Include="rectangle.h" />
+    <ClInclude Include="sceneObject.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="vector2D.h" />
   </ItemGroup>

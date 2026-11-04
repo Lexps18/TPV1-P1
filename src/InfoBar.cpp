@@ -13,8 +13,8 @@ constexpr float ICON_SPACING = 5;	// hueco entre dos flechitas
 constexpr float TEXT_SCALE = 2;		
 constexpr SDL_Color TEXT_COLOR = { 255, 255, 255, 255 };	// blanco
 
-InfoBar::InfoBar(const Game* game, Texture* arrowTexture, SDL_Renderer* renderer)
-	: game(game)
+InfoBar::InfoBar(Game* game, Texture* arrowTexture, SDL_Renderer* renderer)
+	: GameObject(game)
 	, arrowTexture(arrowTexture)
 	, renderer(renderer)
 {
@@ -38,5 +38,11 @@ InfoBar::render() const {
 	SDL_SetRenderScale(renderer, TEXT_SCALE, TEXT_SCALE);	// la escala también multiplica la posición
 	SDL_RenderDebugText(renderer, textX / TEXT_SCALE, MARGIN / TEXT_SCALE, text.c_str());
 	SDL_SetRenderScale(renderer, 1, 1);	// la dejamos como estaba para el resto del juego
+}
+
+bool
+InfoBar::update(float)
+{
+	return true;	// no cambia por sí sola
 }
 	

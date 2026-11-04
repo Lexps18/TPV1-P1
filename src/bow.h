@@ -2,11 +2,12 @@
 
 #include <SDL3/SDL.h>   // SDL_Event
 #include "vector2D.h"
+#include "sceneObject.h"
 
 class Texture;
 class Game;
 
-class Bow
+class Bow : public SceneObject
 {
 public:
 	static constexpr float WIDTH = 105;
@@ -14,9 +15,6 @@ public:
 	static constexpr float SPEED = 300;
 
 private:
-	Game* game;					//entregarle flechas que dipara
-	Texture* texture;
-	Point2D<> position;
 	Vector2D<> direction;		// {0, -1} arriba, {0, 1} abajo, {0, 0} quieto
 	int arrows;					//flechas que quedan
 	bool loaded;
@@ -26,8 +24,8 @@ private:
 public:
 	Bow(Game* game, Texture* texture, Point2D<> position, int numArrows);
 
-	void render() const;
-	bool update(float delta);
+	void render() const override;
+	bool update(float delta) override;
 	void handleEvent(const SDL_Event& event);
 	void handleKeyUp(SDL_Keycode key);
 

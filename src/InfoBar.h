@@ -1,20 +1,20 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include "gameObject.h"
 
-class Game;
 class Texture;
 
-class InfoBar
+class InfoBar : public GameObject
 {
 private:
-	const Game* game;		// para sacar la puntuación y flechas
 	Texture* arrowTexture;	// para dibujar las flechas
 	SDL_Renderer* renderer;	// para escribir texto
 
 public:
-	InfoBar(const Game* game, Texture* arrowTexture, SDL_Renderer* renderer);
+	InfoBar(Game* game, Texture* arrowTexture, SDL_Renderer* renderer);
 
-	void render() const;
+	void render() const override;
+	bool update(float delta) override;
 };
 

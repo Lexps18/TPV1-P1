@@ -4,15 +4,14 @@
 #include <SDL3/SDL.h>
 #include <array>
 #include <istream>
-#include <vector>
+#include <list>
 #include <random>
 #include <string>
 
 // Declaraciones anticipadas
 class Texture;
-class Balloon;
+class SceneObject;
 class Bow;
-class Arrow;
 class Rectangle;
 class InfoBar;
 
@@ -42,9 +41,9 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	std::array<Texture*, NUM_TEXTURES> textures;
-	std::vector<Balloon*> balloons;
+	std::list<SceneObject*> objects;		// todos los objetos de la escena
 	Bow* bow;
-	std::vector<Arrow*> arrows;
+	int arrowsInFlight;		// flechas disparadas que aún no han salido de la ventana
 	std::mt19937_64 randomGenerator;
 	Uint64 nextBallonTime;
 	int initialArrows;
@@ -76,7 +75,11 @@ public:
 	Texture* getTexture(TextureName name) const;
 
 	//añadir una flecha
-	void addArrow(Arrow* arrow);
+	void addObject(SceneObject* object);
+
+	// Las flechas avisan al crearse y al destruirse
+	void arrowCreated();
+	void arrowDestroyed();
 
 	// Ejecuta el bucle principal del juego
 	void run();

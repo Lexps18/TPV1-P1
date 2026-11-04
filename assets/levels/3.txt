@@ -1,0 +1,7 @@
+# Level 3
+bgcolor 135 135 10
+arrows 10
+baldelay 2000
+balpoints 10
+balspeed 0.2
+butterflies 5
