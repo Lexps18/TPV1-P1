@@ -205,9 +205,19 @@ Game::handleEvents()
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_EVENT_QUIT)
 			exit = true;
-
-		bow->handleEvent(event); 
+		else if (event.type == SDL_EVENT_KEY_DOWN && (event.key.mod & SDL_KMOD_CTRL)) 
+		{
+			// Ctrl + S guarda, Ctrl + O carga
+			if (event.key.key == SDLK_S)
+				saveState();
+			else if (event.key.key == SDLK_O)
+				exit = true;
+				//loadState();
+		}
+		else
+			bow->handleEvent(event);
 	}
+	
 }
 
 void  
@@ -381,7 +391,9 @@ Game::saveState() const {
 		throw GameError("No se puede escribir el archivo "s + SAVE_FILE);
 
 	file << level << ' ' << score << '\n';	// cabecera: nivel y puntuación
-	file << "# Balloons" << '\n';		// '\n' cambia de línea
-
-
+	for (SceneObject* object : objects) {
+		object->saveObject(file);
+		file << '\n';
+	}
+	cout << "partida guardada"; 
 }

@@ -42,3 +42,10 @@ Arrow::getTip() const
 {
 	return Rectangle({ position.getX() + WIDTH - TIP_WIDTH, position.getY() }, TIP_WIDTH, height);
 }
+
+void
+Arrow::saveObject(std::ostream& out) const {
+	out << "A ";
+	MobileObject::saveObject(out);
+	out << combo;
+}

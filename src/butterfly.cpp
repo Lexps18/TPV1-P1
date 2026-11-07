@@ -92,3 +92,9 @@ Butterfly::getPoints(int combo) {
 	return BUTTERFLY_POINTS;
 }
 
+void
+Butterfly::saveObject(std::ostream& out) const {
+	out << "F ";
+	MobileObject::saveObject(out);
+	out << dead << ' ' << frame;
+}

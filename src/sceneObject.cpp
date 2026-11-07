@@ -13,3 +13,8 @@ int
 SceneObject::getPoints(int combo) {
 	return 0;
 }
+
+void
+SceneObject::saveObject(std::ostream& out) const{
+	out << position.getX() << ' ' << position.getY() << ' ' << width << ' ' << height;
+}

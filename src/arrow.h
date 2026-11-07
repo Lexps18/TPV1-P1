@@ -23,5 +23,7 @@ public:
 
 	// Rectángulo de la punta, el único trozo que explota globos
 	Rectangle getTip() const;
+
+	void saveObject(std::ostream& out) const override;
 };
 

@@ -28,5 +28,7 @@ public:
 
 	// Rectángulo que ocupa el globo
 	Rectangle getRect() const;
+
+	void saveObject(std::ostream& out) const override;
 };
 

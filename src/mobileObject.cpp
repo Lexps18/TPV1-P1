@@ -9,3 +9,9 @@ MobileObject::update(float delta) {
 	return true;
 }
 
+void
+MobileObject::saveObject(std::ostream& out) const {
+	SceneObject::saveObject(out);
+	out << velocity.getX() << ' ' << velocity.getY();
+}
+

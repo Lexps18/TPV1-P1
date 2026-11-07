@@ -79,3 +79,10 @@ void
 Bow::setArrows(int numArrows) {
 	arrows = numArrows;
 }
+
+void
+Bow::saveObject(std::ostream& out) const {
+	out << "B ";
+	SceneObject::saveObject(out);
+	out << arrows << ' ' << loaded;
+}

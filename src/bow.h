@@ -31,4 +31,6 @@ public:
 
 	int getArrows() const;
 	void setArrows(int numArrows);
+
+	void saveObject(std::ostream& out) const override;
 };

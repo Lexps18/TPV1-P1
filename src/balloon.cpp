@@ -53,3 +53,11 @@ int
 Balloon::getPoints(int combo) {
 	return balloon_points + COMBO_BONUS * combo;
 }
+
+void
+Balloon::saveObject(std::ostream& out) const {
+	out << "B ";
+	MobileObject::saveObject(out);
+	out <<color << ' ' << frame << ' ' << explosionTime;
+}
+
