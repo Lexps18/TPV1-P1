@@ -30,4 +30,5 @@ public:
 	void handleKeyUp(SDL_Keycode key);
 
 	int getArrows() const;
+	void setArrows(int numArrows);
 };

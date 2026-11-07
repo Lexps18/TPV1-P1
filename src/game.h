@@ -50,11 +50,13 @@ private:
 	int initialArrows;
 	Uint64 balloonDelay;
 	int balloonPoints;
+	float balloonSpeed;
 	InfoBar* infoBar;	// barra con flechas y puntuación
+	int initialButterflies;
+	int level;
+	int goal;
 	SDL_Color backgroundColor;
-
-	// Puntuación jugador
-	int score;
+	int score;			// Puntuación jugador
 
 	void render() const;
 	void update();
@@ -66,6 +68,8 @@ private:
 	void loadConfig(const std::string& filename);
 
 	void renderHitboxes() const;
+	void nextLevel();
+	void saveState() const;
 
 	bool exit;
 
@@ -87,7 +91,8 @@ public:
 	void run();
 
 	// Comprueba si hay algún objeto colocado en ese rectángulo
-	bool checkCollision(const Rectangle& rect);
+	bool checkCollision(const Rectangle& rect, int combo);
+	void givePoints(int combo);
 
 	// Datos que muestra la barra de información
 	int getScore() const;
@@ -95,6 +100,8 @@ public:
 
 	// Número real aleatorio entre min y max
 	float getRandom(float min, float max);
+
+	void clearObjects();
 };
 
 inline Texture*

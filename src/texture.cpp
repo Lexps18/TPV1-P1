@@ -10,12 +10,17 @@
 #include <SDL3_image/SDL_image.h>
 #include <string>
 
+#include "sdlError.h"
+
 using namespace std;
 
 SDL_Texture*
 tryLoadTexture(SDL_Renderer* renderer, const char* filename)
 {
 	SDL_Texture* texture = IMG_LoadTexture(renderer, filename);
+
+	if (texture == nullptr)
+		throw SDLError("IMG_LoadTexture "s + filename);
 
 	if (texture == nullptr)
 		throw "load image texture: "s + filename;

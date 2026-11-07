@@ -5,6 +5,7 @@
 
 Arrow::Arrow(Game* game, Texture* texture, Point2D<> start, Vector2D<> velocity)
 	: MobileObject(game, texture, start, WIDTH, WIDTH / texture->getAspectRatio(), velocity)
+	, combo(0)
 {
 	position = position - Vector2D<>(0, height / 2);
 	game->arrowCreated();	// el juego lleva la cuenta de las flechas en vuelo
@@ -28,7 +29,9 @@ Arrow::update(float delta)
 {
 	MobileObject::update(delta);
 
-	game->checkCollision(getTip());
+	if (game->checkCollision(getTip(), combo)) {
+		combo++;
+	}
 
 	// Sigue viva mientras su borde izquierdo no haya pasado el borde derecho de la ventana
 	return position.getX() < Game::WINDOW_WIDTH;

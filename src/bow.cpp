@@ -74,3 +74,8 @@ int
 Bow::getArrows() const {
 	return arrows;
 }
+
+void
+Bow::setArrows(int numArrows) {
+	arrows = numArrows;
+}

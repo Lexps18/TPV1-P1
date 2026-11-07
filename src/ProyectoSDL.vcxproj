@@ -101,6 +101,8 @@
     <ClCompile Include="balloon.cpp" />
     <ClCompile Include="bow.cpp" />
     <ClCompile Include="butterfly.cpp" />
+    <ClCompile Include="fileFormatError.cpp" />
+    <ClCompile Include="fileNotFoundError.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gameObject.cpp" />
     <ClCompile Include="InfoBar.cpp" />
@@ -108,6 +110,7 @@
     <ClCompile Include="mobileObject.cpp" />
     <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="sceneObject.cpp" />
+    <ClCompile Include="sdlError.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -115,12 +118,16 @@
     <ClInclude Include="balloon.h" />
     <ClInclude Include="bow.h" />
     <ClInclude Include="butterfly.h" />
+    <ClInclude Include="fileFormatError.h" />
+    <ClInclude Include="fileNotFoundError.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="gameError.h" />
     <ClInclude Include="gameObject.h" />
     <ClInclude Include="InfoBar.h" />
     <ClInclude Include="mobileObject.h" />
     <ClInclude Include="rectangle.h" />
     <ClInclude Include="sceneObject.h" />
+    <ClInclude Include="sdlError.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="vector2D.h" />
   </ItemGroup>

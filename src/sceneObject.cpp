@@ -10,6 +10,6 @@ SceneObject::hit(const Rectangle&) {
 }
 
 int
-SceneObject::getPoints() {
+SceneObject::getPoints(int combo) {
 	return 0;
 }

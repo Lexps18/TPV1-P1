@@ -8,6 +8,7 @@
 #include <string>
 
 #include "game.h"
+#include "gameError.h"
 
 using namespace std;
 
@@ -16,8 +17,8 @@ int main(int argc, char* argv[])
 	try {
 		Game().run();
 	}
-	catch (const string& error) {	// todos los errores del juego son string
-		cerr << "Error: " << error << endl;
+	catch (const GameError& error) {	// todos los errores del juego son string
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", error.what(), nullptr);
 	}
 
 	return 0;

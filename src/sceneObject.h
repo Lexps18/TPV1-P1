@@ -16,6 +16,7 @@ protected:
 public:
 	SceneObject(Game* game, Texture* texture, Point2D<> position, float width, float height);
 	virtual bool hit(const Rectangle& rect);
-	virtual int getPoints();
+	virtual int getPoints(int combo);
+	virtual void saveObject() = 0;
 };
 

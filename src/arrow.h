@@ -11,7 +11,8 @@ public:
 	static constexpr float SPEED = 150;
 	static constexpr float TIP_WIDTH = 15;
 
-public:
+	int combo;
+
 	Arrow(Game* game, Texture* texture, Point2D<> start, Vector2D<> velocity);
 	~Arrow() override;
 

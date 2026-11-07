@@ -1,5 +1,5 @@
 # Level 1
-bgcolor 0 170 85
+bgcolor 0 170 86
 arrows 10
 baldelay 1000
 balpoints 10

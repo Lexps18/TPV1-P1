@@ -31,6 +31,6 @@ public:
 
 	// Rectángulo que ocupa el globo
 	Rectangle getRect() const;
-	int getPoints() override;
+	int getPoints(int combo) override;
 };
 
