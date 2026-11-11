@@ -23,6 +23,7 @@ private:
 
 public:
 	Bow(Game* game, Texture* texture, Point2D<> position, int numArrows);
+	Bow(Game* game, std::istream& line);
 
 	void render() const override;
 	bool update(float delta) override;

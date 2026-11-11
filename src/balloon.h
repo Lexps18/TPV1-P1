@@ -20,6 +20,7 @@ private:
 
 public:
 	Balloon(Game* game, Texture* texture, Point2D<> position, Vector2D<> velocity, int color, int balloon_points);
+	Balloon(Game* game, int balloonPoints, std::istream& line);
 
 	void render() const override;
 	bool update(float delta) override;

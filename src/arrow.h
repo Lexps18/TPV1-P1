@@ -11,9 +11,12 @@ public:
 	static constexpr float SPEED = 150;
 	static constexpr float TIP_WIDTH = 15;
 
-	int combo;
+private:
+	int combo;		// globos explotados por esta flecha
 
+public:
 	Arrow(Game* game, Texture* texture, Point2D<> start, Vector2D<> velocity);
+	Arrow(Game* game, std::istream& line);
 	~Arrow() override;
 
 	void render() const override;

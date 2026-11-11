@@ -3,6 +3,13 @@
 MobileObject::MobileObject(Game* game, Texture* texture, Point2D<> position, float width, float height, Vector2D<> velocity)
 	:SceneObject(game, texture, position, width, height), velocity(velocity) {}
 
+MobileObject::MobileObject(Game* game, Texture* texture, std::istream& line)
+	:SceneObject(game, texture, line) {
+	float vX, vY;
+	line >> vX >> vY;
+	velocity = { vX, vY };
+}
+
 bool
 MobileObject::update(float delta) {
 	position += velocity * delta;
@@ -12,6 +19,5 @@ MobileObject::update(float delta) {
 void
 MobileObject::saveObject(std::ostream& out) const {
 	SceneObject::saveObject(out);
-	out << velocity.getX() << ' ' << velocity.getY();
+	out << ' ' << velocity.getX() << ' ' << velocity.getY();
 }
-

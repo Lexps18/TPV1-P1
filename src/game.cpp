@@ -55,10 +55,12 @@ constexpr array<TextureSpec, Game::NUM_TEXTURES> textureList{
 Game::Game()
 	: window(nullptr)
 	, renderer(nullptr)
+	, textures{}		// todas a nullptr
 	, bow(nullptr)
 	, arrowsInFlight(0)
+	, butterfliesAlive(0)
 	, randomGenerator(random_device()())
-	, nextBallonTime(0)
+	, balloonTimer(0)
 	, initialArrows(0)
 	, balloonDelay(0)
 	, balloonPoints(0)
@@ -78,16 +80,15 @@ Game::Game()
 
 	// Carga SDL y crea la ventana con su renderizador
 	if (!SDL_Init(SDL_INIT_VIDEO))
-		throw "SDL_Init: "s + SDL_GetError();
+		throw SDLError("SDL_Init");
 
-	if (!SDL_CreateWindowAndRenderer(WINDOW_TITLE,
-	                                 WINDOW_WIDTH, WINDOW_HEIGHT,
-	                                 0, &window, &renderer))
-		throw SDLError("SDL_CreateWindowAndRenderer");
-
-	// Carga las texturas al inicio
 	try {
-		textures.fill(nullptr);
+		if (!SDL_CreateWindowAndRenderer(WINDOW_TITLE,
+		                                 WINDOW_WIDTH, WINDOW_HEIGHT,
+		                                 0, &window, &renderer))
+			throw SDLError("SDL_CreateWindowAndRenderer");
+
+		// Carga las texturas al inicio
 		string imgRoot = IMAGE_ROOT;
 
 		for (size_t i = 0; i < textures.size(); i++) {
@@ -96,14 +97,8 @@ Game::Game()
 		}
 	}
 	catch (...) {
-		// Si falla una textura, el destructor no se llamará
-		for (Texture* texture : textures)
-			delete texture;
-
-		SDL_DestroyRenderer(renderer);
-		SDL_DestroyWindow(window);
-		SDL_Quit();
-
+		// Si falla el constructor, el destructor no se llamará
+		freeResources();
 		throw;
 	}
 	//arco
@@ -124,12 +119,19 @@ Game::~Game()
 	for (SceneObject* object : objects)
 		delete object;
 
-	// Liberar cada textura
+	freeResources();
+}
+
+void
+Game::freeResources()
+{
 	for (Texture* texture : textures)
 		delete texture;
 
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
+	if (renderer != nullptr)
+		SDL_DestroyRenderer(renderer);
+	if (window != nullptr)
+		SDL_DestroyWindow(window);
 	SDL_Quit();
 }
 
@@ -148,15 +150,11 @@ Game::render() const
 }
 
 void
-Game::update()
+Game::update(float delta)
 {
-	// Tiempo de un ciclo en segundos 
-	constexpr float delta = FRAME_PERIOD / MS_PER_SECOND;
+	generateRandomBallon(delta);
 
-	generateRandomBallon();
-
-	bow->update(delta);
-
+	// El arco está en objects, así que ya se actualiza en este bucle
 	for (auto it = objects.begin(); it != objects.end(); ) {
 		if ((*it)->update(delta)) {
 			++it;
@@ -175,25 +173,35 @@ Game::update()
 		cout << "Se acabo, tu puntuacion es: " << score << endl;
 		exit = true;
 	}
+	// Si el nivel tenía mariposas y ya no queda ninguna viva, se pierde
+	if (!exit && initialButterflies > 0 && butterfliesAlive == 0) {
+		cout << "Has perdido: no quedan mariposas. Puntuacion: " << score << endl;
+		exit = true;
+	}
 
 }
 
 void
 Game::run()
 {
+	Uint64 lastFrame = SDL_GetTicks();
+
 	while (!exit) {
-		//momento en que empieza este ciclo
+		// Momento en que empieza este ciclo
 		Uint64 frameStart = SDL_GetTicks();
 
-		handleEvents();
-		update(); 
-		render(); 
+		// Delta: tiempo transcurrido desde el ciclo anterior (incluida la espera), en segundos
+		float delta = (frameStart - lastFrame) / MS_PER_SECOND;
+		lastFrame = frameStart;
 
-		//si el ciclo ha tardado menos de Frame_Period, esperar
+		handleEvents();
+		update(delta);
+		render();
+
+		// Si el ciclo ha tardado menos de FRAME_PERIOD, esperar el resto
 		Uint64 frameTime = SDL_GetTicks() - frameStart;
-		if (frameTime < FRAME_PERIOD) {
+		if (frameTime < FRAME_PERIOD)
 			SDL_Delay(Uint32(FRAME_PERIOD - frameTime));
-		}
 	}
 }
 
@@ -211,8 +219,7 @@ Game::handleEvents()
 			if (event.key.key == SDLK_S)
 				saveState();
 			else if (event.key.key == SDLK_O)
-				exit = true;
-				//loadState();
+				loadState();
 		}
 		else
 			bow->handleEvent(event);
@@ -238,12 +245,25 @@ Game::arrowDestroyed()
 }
 
 void
-Game::generateRandomBallon() {
+Game::butterflyBorn()
+{
+	butterfliesAlive++;
+}
 
-	if (SDL_GetTicks() < nextBallonTime)
+void
+Game::butterflyDied()
+{
+	butterfliesAlive--;
+}
+
+void
+Game::generateRandomBallon(float delta) {
+	// Se cuenta tiempo de juego (delta), no tiempo real
+	balloonTimer += delta * MS_PER_SECOND;
+	if (balloonTimer < balloonDelay)
 		return;
 
-	nextBallonTime = SDL_GetTicks() + balloonDelay;
+	balloonTimer -= balloonDelay;
 	float pos_x = uniform_real_distribution<float>(BALLOON_MIN_X, WINDOW_WIDTH - Balloon::SIZE)(randomGenerator);
 	float vel_y = uniform_real_distribution<float>(balloonSpeed * (1 - BALLOON_SPEED_VARIATION), balloonSpeed * (1 + BALLOON_SPEED_VARIATION))(randomGenerator);
 	int color = uniform_int_distribution<int>(0, getTexture(BALLOONS)->getNumRows() - 1)(randomGenerator);
@@ -386,7 +406,7 @@ Game::nextLevel() {
 
 void
 Game::saveState() const {
-	ofstream file(SAVE_FILE);
+	ofstream file(string(LEVEL_ROOT) + SAVE_FILE);
 	if (!file)
 		throw GameError("No se puede escribir el archivo "s + SAVE_FILE);
 
@@ -395,5 +415,69 @@ Game::saveState() const {
 		object->saveObject(file);
 		file << '\n';
 	}
-	cout << "partida guardada"; 
+	cout << "Partida guardada" << '\n';
 }
+
+void
+Game::loadState() {
+	ifstream file(string(LEVEL_ROOT) + SAVE_FILE);
+	if (!file)
+		throw FileNotFoundError(string(LEVEL_ROOT) + SAVE_FILE);
+
+	string text;
+	getline(file, text);
+	istringstream header(text);
+	int savedLevel = 0, savedScore = 0;
+	if (!(header >> savedLevel >> savedScore))
+		throw FileFormatError(string(LEVEL_ROOT) + SAVE_FILE, 1, "cabecera no valida");
+
+	level = savedLevel;
+	score = savedScore;
+	goal = 0;
+	loadConfig(string(LEVEL_ROOT) + to_string(level) + ".txt");
+
+	// Borra todos los objetos actuales, arco incluido
+	for (SceneObject* object : objects)
+		delete object;
+
+	objects.clear();
+	bow = nullptr;
+
+	int lineNumber = 1;
+	while (getline(file, text)) {
+		lineNumber++;
+		istringstream line(text);	// se lee de la línea como si fuera un archivo
+
+		char type;
+		if (!(line >> type))		// línea vacía
+			continue;
+
+		objects.push_back(loadObject(type, line, lineNumber));
+
+		if (!line)	// no había un número donde tocaba
+			throw FileFormatError(SAVE_FILE, lineNumber, "datos no validos");
+	}
+
+}
+
+SceneObject*
+Game::loadObject(char type, istream& line, int lineNumber)
+{
+	switch (type) {
+	case 'W':
+		if (bow != nullptr)
+			throw FileFormatError(SAVE_FILE, lineNumber, "hay mas de un arco");
+		bow = new Bow(this, line);
+		return bow;
+	case 'B':
+		return new Balloon(this, balloonPoints, line);
+	case 'A':
+		return new Arrow(this, line);
+	case 'F':
+		return new Butterfly(this, line);
+	default:
+		throw FileFormatError(SAVE_FILE, lineNumber, "tipo de objeto desconocido: "s + type);
+	}
+}
+
+

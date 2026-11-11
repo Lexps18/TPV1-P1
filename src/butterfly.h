@@ -24,6 +24,9 @@ private:
 
 public:
 	Butterfly(Game* game, Texture* texture, Point2D<> position, Vector2D<> velocity);
+	Butterfly(Game* game, std::istream& line);
+
+	~Butterfly() override;
 
 	void render() const override;
 	bool update(float delta) override;

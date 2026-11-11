@@ -22,9 +22,6 @@ tryLoadTexture(SDL_Renderer* renderer, const char* filename)
 	if (texture == nullptr)
 		throw SDLError("IMG_LoadTexture "s + filename);
 
-	if (texture == nullptr)
-		throw "load image texture: "s + filename;
-
 	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 
 	return texture;

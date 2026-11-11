@@ -1,11 +1,19 @@
 #include "balloon.h"
 #include "texture.h"
 #include "rectangle.h"
+#include "game.h"
 
 Balloon::Balloon(Game* game, Texture* texture, Point2D<> position, Vector2D<> velocity, int color, int balloon_points) 
 	: MobileObject(game, texture, position, SIZE, SIZE, velocity), 
 	color(color), frame(0), explosionTime(0), balloon_points(balloon_points)
 {
+}
+
+Balloon::Balloon(Game* game, int balloonPoints, std::istream& line)
+	: MobileObject(game, game->getTexture(Game::BALLOONS), line),
+	balloon_points(balloonPoints)
+{
+	line >> color >> frame >> explosionTime;
 }
 
 void 
@@ -58,6 +66,6 @@ void
 Balloon::saveObject(std::ostream& out) const {
 	out << "B ";
 	MobileObject::saveObject(out);
-	out <<color << ' ' << frame << ' ' << explosionTime;
+	out << ' ' << color << ' ' << frame << ' ' << explosionTime;
 }
 

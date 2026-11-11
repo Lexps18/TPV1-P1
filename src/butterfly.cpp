@@ -11,7 +11,21 @@ using namespace std;
 Butterfly::Butterfly(Game* game, Texture* texture, Point2D<> position, Vector2D<> velocity)
 	: MobileObject(game, texture, position, SIZE, SIZE, velocity),
 	frame(0), frameTime(0), directionTime(DIRECTION_CHANGE_TIME), dead(false)
-{}
+{
+	game->butterflyBorn();
+}
+
+Butterfly::Butterfly(Game* game, std::istream& line)
+	: MobileObject(game, game->getTexture(Game::BUTTERFLY), line)
+{
+	line >> frame >> frameTime >> directionTime >> dead;
+	if(!dead)
+		game->butterflyBorn();
+}
+
+Butterfly::~Butterfly() {
+	game->butterflyDied();
+}
 
 void
 Butterfly::render() const {
@@ -96,5 +110,5 @@ void
 Butterfly::saveObject(std::ostream& out) const {
 	out << "F ";
 	MobileObject::saveObject(out);
-	out << dead << ' ' << frame;
+	out << ' ' << frame << ' ' << frameTime << ' ' << directionTime << ' ' << dead;
 }

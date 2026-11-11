@@ -9,6 +9,15 @@ Bow::Bow(Game* game, Texture* texture, Point2D<> position, int numArrows)
 {
 }
 
+Bow::Bow(Game* game, std::istream& line)
+	:SceneObject(game, game->getTexture(Game::BOW), line)
+	, direction(0, 0)
+	, arrows(0)
+	, loaded(false)
+{
+	line >> arrows >> loaded;
+}
+
 void 
 Bow::render() const {
 	SDL_FRect target{ position.getX(), position.getY(), WIDTH, HEIGHT };
@@ -82,7 +91,7 @@ Bow::setArrows(int numArrows) {
 
 void
 Bow::saveObject(std::ostream& out) const {
-	out << "B ";
+	out << "W ";	// W de boW: la B ya es de los globos
 	SceneObject::saveObject(out);
-	out << arrows << ' ' << loaded;
+	out << ' ' << arrows << ' ' << loaded;
 }

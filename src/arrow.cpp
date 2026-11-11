@@ -11,6 +11,12 @@ Arrow::Arrow(Game* game, Texture* texture, Point2D<> start, Vector2D<> velocity)
 	game->arrowCreated();	// el juego lleva la cuenta de las flechas en vuelo
 }
 
+Arrow::Arrow(Game* game, std::istream& line)
+	: MobileObject(game, game->getTexture(Game::ARROW), line) {
+	line >> combo;
+	game->arrowCreated();	
+}
+
 Arrow::~Arrow()
 {
 	game->arrowDestroyed();
@@ -47,5 +53,5 @@ void
 Arrow::saveObject(std::ostream& out) const {
 	out << "A ";
 	MobileObject::saveObject(out);
-	out << combo;
+	out << ' ' << combo;
 }

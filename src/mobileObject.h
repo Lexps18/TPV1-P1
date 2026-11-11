@@ -8,6 +8,7 @@ protected:
 
 public:
 	MobileObject(Game* game, Texture* texture, Point2D<> position, float width, float height, Vector2D<> velocity);
+	MobileObject(Game* game, Texture* texture, std::istream& line);
 
 	bool update(float delta) override;
 
