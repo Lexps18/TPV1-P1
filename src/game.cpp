@@ -49,7 +49,8 @@ constexpr array<TextureSpec, Game::NUM_TEXTURES> textureList{
 	TextureSpec{"bow.png", 1, 2},
 	{"arrow.png"},
 	{"balloons.png", 7, 6},
-	{"butterfly.png", 4, 10}	
+	{"butterfly.png", 4, 10},
+	{"digits.png", 1, 10}
 };
 
 Game::Game()
@@ -109,7 +110,7 @@ Game::Game()
 	generateRandomButterfly(initialButterflies);
 
 	//infobar
-	infoBar = new InfoBar(this, getTexture(ARROW), renderer);
+	infoBar = new InfoBar(this, getTexture(ARROW), getTexture(NUMBER), renderer);
 }
 
 Game::~Game()

@@ -35,6 +35,7 @@ public:
 		ARROW,
 		BALLOONS,
 		BUTTERFLY,
+		NUMBER,
 		NUM_TEXTURES
 	};
 

@@ -10,12 +10,16 @@ using namespace std;
 constexpr float MARGIN = 10;		// separación con los bordes de la ventana
 constexpr float ICON_WIDTH = 30;	// ancho de cada flechita
 constexpr float ICON_SPACING = 5;	// hueco entre dos flechitas
+
+constexpr float DIGIT_WIDTH = 30;	// ancho de cada cifra en pantalla
+
 constexpr float TEXT_SCALE = 2;		
 constexpr SDL_Color TEXT_COLOR = { 255, 255, 255, 255 };	// blanco
 
-InfoBar::InfoBar(Game* game, Texture* arrowTexture, SDL_Renderer* renderer)
+InfoBar::InfoBar(Game* game, Texture* arrowTexture, Texture* numberTexture, SDL_Renderer* renderer)
 	: GameObject(game)
 	, arrowTexture(arrowTexture)
+	, numberTexture(numberTexture)
 	, renderer(renderer)
 {
 }
@@ -30,14 +34,17 @@ InfoBar::render() const {
 	}
 
 	// Puntuación arriba a la derecha
-	string text = "Puntos: " + to_string(game->getScore());
-	float textWidth = float(text.size()) * SDL_DEBUG_TEXT_FONT_CHARACTER_SIZE * TEXT_SCALE;
-	float textX = Game::WINDOW_WIDTH - MARGIN - textWidth;
-
-	SDL_SetRenderDrawColor(renderer, TEXT_COLOR.r, TEXT_COLOR.g, TEXT_COLOR.b, TEXT_COLOR.a);
-	SDL_SetRenderScale(renderer, TEXT_SCALE, TEXT_SCALE);	// la escala también multiplica la posición
-	SDL_RenderDebugText(renderer, textX / TEXT_SCALE, MARGIN / TEXT_SCALE, text.c_str());
-	SDL_SetRenderScale(renderer, 1, 1);	// la dejamos como estaba para el resto del juego
+	float digitHeight = DIGIT_WIDTH / numberTexture->getAspectRatio();
+	int remaining = game->getScore();
+	int i = 0;
+	while (remaining > 0 || i == 0) {
+		int digit = remaining % 10;	// la última cifra
+		float x = Game::WINDOW_WIDTH - MARGIN - float(i + 1) * DIGIT_WIDTH;
+		SDL_FRect dest{ x, MARGIN, DIGIT_WIDTH, digitHeight };
+		numberTexture->renderFrame(dest, 0, digit);
+		remaining /= 10;		// quita la última cifra
+		i++;
+	}
 }
 
 bool
