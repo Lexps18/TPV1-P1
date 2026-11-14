@@ -119,7 +119,7 @@ Game::Game()
 	generateRandomButterfly(initialButterflies);
 
 	//infobar
-	infoBar = new InfoBar(this, getTexture(ARROW), getTexture(NUMBER), renderer);
+	infoBar = new InfoBar(this, getTexture(ARROW), getTexture(NUMBER));
 }
 
 Game::~Game()
@@ -397,32 +397,38 @@ Game::loadConfig(const string& filename)
 		if (!(line >> key))		// línea vacía
 			continue;
 
-		if (key == "arrows")
-			line >> initialArrows;
-		else if (key == "baldelay")
-			line >> balloonDelay;
-		else if (key == "balpoints")
-			line >> balloonPoints;
-		else if (key == "goal")
-			line >> goal;
-		else if (key == "balspeed") {
-			line >> balloonSpeed;
-			balloonSpeed *= MS_PER_SECOND;	// el archivo lo da en píxeles por milisegundo
-			if (line && balloonSpeed <= 0)
-				throw FileFormatError(filename, lineNumber, "balspeed tiene que ser mayor que 0");
-		}
-		else if (key == "butterflies")
-			line >> initialButterflies;
-		else if (key == "bgcolor") {
-			int r = 0, g = 0, b = 0;	// leídos como int, un Uint8 se leería como carácter
-			line >> r >> g >> b;
-			if (line && (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255))
-				throw FileFormatError(filename, lineNumber, "componente de color fuera de 0-255");
-			backgroundColor = { Uint8(r), Uint8(g), Uint8(b), SDL_ALPHA_OPAQUE };
-		}
+		readConfigOption(key, line, filename, lineNumber);
 
 		if (!line)	// no había un número donde tocaba
 			throw FileFormatError(filename, lineNumber, "valor no valido para " + key);
+	}
+}
+
+void
+Game::readConfigOption(const string& key, istream& line, const string& filename, int lineNumber)
+{
+	if (key == "arrows")
+		line >> initialArrows;
+	else if (key == "baldelay")
+		line >> balloonDelay;
+	else if (key == "balpoints")
+		line >> balloonPoints;
+	else if (key == "goal")
+		line >> goal;
+	else if (key == "balspeed") {
+		line >> balloonSpeed;
+		balloonSpeed *= MS_PER_SECOND;	// el archivo lo da en píxeles por milisegundo
+		if (line && balloonSpeed <= 0)
+			throw FileFormatError(filename, lineNumber, "balspeed tiene que ser mayor que 0");
+	}
+	else if (key == "butterflies")
+		line >> initialButterflies;
+	else if (key == "bgcolor") {
+		int r = 0, g = 0, b = 0;	// leídos como int, un Uint8 se leería como carácter
+		line >> r >> g >> b;
+		if (line && (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255))
+			throw FileFormatError(filename, lineNumber, "componente de color fuera de 0-255");
+		backgroundColor = { Uint8(r), Uint8(g), Uint8(b), SDL_ALPHA_OPAQUE };
 	}
 }
 
@@ -477,7 +483,7 @@ void
 Game::saveState(const string& filename) const {
 	ofstream file(filename);
 	if (!file)
-		throw GameError("No se puede escribir el archivo " + filename);
+		throw FileNotFoundError(filename);	// no se ha podido abrir para escribir
 
 	file << level << ' ' << score << '\n';	// cabecera: nivel y puntuación
 	for (SceneObject* object : objects) {
@@ -505,14 +511,26 @@ Game::loadState(const string& filename) {
 	goal = 0;
 	loadConfig(string(LEVEL_ROOT) + to_string(level) + ".txt");
 
+	deleteAllObjects();
+	readSavedObjects(file, filename);
+}
+
+void
+Game::deleteAllObjects()
+{
 	// Borra todos los objetos actuales, arco incluido
 	for (SceneObject* object : objects)
 		delete object;
 
 	objects.clear();
 	bow = nullptr;
+}
 
-	int lineNumber = 1;
+void
+Game::readSavedObjects(istream& file, const string& filename)
+{
+	string text;
+	int lineNumber = 1;	// la línea 1 es la cabecera
 	while (getline(file, text)) {
 		lineNumber++;
 		istringstream line(text);	// se lee de la línea como si fuera un archivo

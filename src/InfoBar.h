@@ -10,10 +10,9 @@ class InfoBar : public GameObject
 private:
 	Texture* arrowTexture;	// para dibujar las flechas
 	Texture* numberTexture;	// para dibujar los numeros
-	SDL_Renderer* renderer;	// para escribir texto
 
 public:
-	InfoBar(Game* game, Texture* arrowTexture, Texture* numberTexture, SDL_Renderer* renderer);
+	InfoBar(Game* game, Texture* arrowTexture, Texture* numberTexture);
 
 	void render() const override;
 	bool update(float delta) override;

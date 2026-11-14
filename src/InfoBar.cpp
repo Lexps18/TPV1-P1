@@ -13,14 +13,10 @@ constexpr float ICON_SPACING = 5;	// hueco entre dos flechitas
 
 constexpr float DIGIT_WIDTH = 30;	// ancho de cada cifra en pantalla
 
-constexpr float TEXT_SCALE = 2;		
-constexpr SDL_Color TEXT_COLOR = { 255, 255, 255, 255 };	// blanco
-
-InfoBar::InfoBar(Game* game, Texture* arrowTexture, Texture* numberTexture, SDL_Renderer* renderer)
+InfoBar::InfoBar(Game* game, Texture* arrowTexture, Texture* numberTexture)
 	: GameObject(game)
 	, arrowTexture(arrowTexture)
 	, numberTexture(numberTexture)
-	, renderer(renderer)
 {
 }
 

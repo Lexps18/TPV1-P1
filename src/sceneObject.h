@@ -18,7 +18,7 @@ public:
 	SceneObject(Game* game, Texture* texture, Point2D<> position, float width, float height);
 	SceneObject(Game* game, Texture* texture, std::istream& line);
 	virtual bool hit(const Rectangle& rect);
-	virtual int getPoints(int combo);
+	virtual int getPoints(int combo) const;
 	virtual void saveObject(std::ostream& out) const;
 };
 

@@ -25,7 +25,7 @@ public:
 	void render() const override;
 	bool update(float delta) override;
 	bool hit(const Rectangle&) override;
-	int getPoints(int combo) override;
+	int getPoints(int combo) const override;
 
 	// Rectángulo que ocupa el globo
 	Rectangle getRect() const;

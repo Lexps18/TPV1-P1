@@ -68,11 +68,17 @@ private:
 	void generateRandomButterfly(int numButterfly);
 	// Lee las opciones del archivo de configuración
 	void loadConfig(const std::string& filename);
+	// Lee el valor de una opción (key) del archivo de configuración
+	void readConfigOption(const std::string& key, std::istream& line, const std::string& filename, int lineNumber);
 
 	void renderHitboxes() const;
 	void nextLevel();
 	void saveState(const std::string& filename) const;
 	void loadState(const std::string& filename);
+	// Borra todos los objetos de la escena, arco incluido
+	void deleteAllObjects();
+	// Lee los objetos del archivo de guardado (todas las líneas tras la cabecera)
+	void readSavedObjects(std::istream& file, const std::string& filename);
 	// Libera texturas y recursos de SDL (lo usan el constructor si falla y el destructor)
 	void freeResources();
 

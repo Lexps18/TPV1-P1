@@ -102,7 +102,7 @@ Butterfly::getRect() const
 }
 
 int
-Butterfly::getPoints(int combo) {
+Butterfly::getPoints(int combo) const {
 	return BUTTERFLY_POINTS;
 }
 

@@ -58,7 +58,7 @@ Balloon::getRect() const
 }
 
 int
-Balloon::getPoints(int combo) {
+Balloon::getPoints(int combo) const {
 	return balloon_points + COMBO_BONUS * combo;
 }
 
