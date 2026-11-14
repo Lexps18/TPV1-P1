@@ -71,15 +71,34 @@ private:
 
 	void renderHitboxes() const;
 	void nextLevel();
-	void saveState() const;
-	void loadState();
+	void saveState(const std::string& filename) const;
+	void loadState(const std::string& filename);
 	// Libera texturas y recursos de SDL (lo usan el constructor si falla y el destructor)
 	void freeResources();
 
 	// Crea el objeto de una línea del archivo de guardado según su letra
-	SceneObject* loadObject(char type, std::istream& line, int lineNumber);
+	SceneObject* loadObject(char type, std::istream& line, const std::string& filename, int lineNumber);
+
+	// Diálogos de archivo de SDL (asíncronos)
+	enum DialogType
+	{
+		SAVE_DIALOG = 0,
+		LOAD_DIALOG
+	};
+
+	// Abren el diálogo y pausan el juego hasta que el usuario elija o cancele
+	void openSaveDialog();
+	void openLoadDialog();
+	// Se llama cuando el diálogo se ha cerrado: guarda o carga
+	void handleDialogEvent();
+
+	// Función que SDL llama cuando el usuario cierra el diálogo
+	static void SDLCALL dialogCallback(void* userdata, const char* const* filelist, int filter);
 
 	bool exit;
+	bool dialogOpen;		// hay un diálogo abierto: el juego está en pausa
+	DialogType dialogType;	// qué diálogo está abierto (guardar o cargar)
+	std::string dialogFile;	// archivo que ha elegido el usuario ("" si canceló)
 
 public:
 	Game();

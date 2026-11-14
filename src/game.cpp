@@ -26,7 +26,16 @@ constexpr const char* const WINDOW_TITLE = "Bow & Arrow 1.0";
 constexpr const char* IMAGE_ROOT = "../assets/images/";
 constexpr const char* LEVEL_ROOT = "../assets/levels/";
 constexpr const char* LEVEL_FILE = "1.txt";
-constexpr const char* SAVE_FILE = "saved.txt";
+
+// Evento propio que manda el callback de los diálogos al cerrarse
+constexpr Uint32 DIALOG_EVENT = SDL_EVENT_USER;
+
+// Tipos de archivo que ofrecen los diálogos de guardar y cargar
+constexpr SDL_DialogFileFilter SAVE_FILTERS[] = {
+	{ "Partidas guardadas (*.txt)", "txt" },
+	{ "Todos los archivos", "*" }
+};
+constexpr int NUM_SAVE_FILTERS = 2;
 
 constexpr SDL_Color DEFAULT_BG_COLOR = { 0, 170, 85, SDL_ALPHA_OPAQUE };	
 constexpr float BOW_X = 10;			// distancia del arco al borde izquierdo
@@ -73,8 +82,8 @@ Game::Game()
 	, backgroundColor(DEFAULT_BG_COLOR)
 	, score(0)
 	, exit(false)
-
-	
+	, dialogOpen(false)
+	, dialogType(SAVE_DIALOG)
 {
 	// Lee la configuración lo primero: si falla, aún no hay nada que liberar
 	loadConfig(string(LEVEL_ROOT) + LEVEL_FILE);
@@ -196,7 +205,9 @@ Game::run()
 		lastFrame = frameStart;
 
 		handleEvents();
-		update(delta);
+		// Mientras hay un diálogo abierto el juego está en pausa: no se actualiza
+		if (!dialogOpen)
+			update(delta);
 		render();
 
 		// Si el ciclo ha tardado menos de FRAME_PERIOD, esperar el resto
@@ -214,18 +225,75 @@ Game::handleEvents()
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_EVENT_QUIT)
 			exit = true;
-		else if (event.type == SDL_EVENT_KEY_DOWN && (event.key.mod & SDL_KMOD_CTRL)) 
+		else if (event.type == DIALOG_EVENT)
+			handleDialogEvent();
+		else if (dialogOpen)
+			continue;	// en pausa: se ignora el teclado hasta que se cierre el diálogo
+		else if (event.type == SDL_EVENT_KEY_DOWN && (event.key.mod & SDL_KMOD_CTRL))
 		{
 			// Ctrl + S guarda, Ctrl + O carga
 			if (event.key.key == SDLK_S)
-				saveState();
+				openSaveDialog();
 			else if (event.key.key == SDLK_O)
-				loadState();
+				openLoadDialog();
 		}
 		else
 			bow->handleEvent(event);
 	}
-	
+
+}
+
+void
+Game::openSaveDialog()
+{
+	dialogOpen = true;			// pausa el juego
+	dialogType = SAVE_DIALOG;	// para saber luego que hay que guardar
+	SDL_ShowSaveFileDialog(dialogCallback, this, window, SAVE_FILTERS, NUM_SAVE_FILTERS, nullptr);
+}
+
+void
+Game::openLoadDialog()
+{
+	dialogOpen = true;			// pausa el juego
+	dialogType = LOAD_DIALOG;	// para saber luego que hay que cargar
+	SDL_ShowOpenFileDialog(dialogCallback, this, window, SAVE_FILTERS, NUM_SAVE_FILTERS, nullptr, false);
+}
+
+void SDLCALL
+Game::dialogCallback(void* userdata, const char* const* filelist, int)
+{
+	// userdata es el "this" que pasamos al abrir el diálogo
+	Game* game = static_cast<Game*>(userdata);
+
+	// Apuntamos el archivo elegido ("" si el usuario canceló o hubo error)
+	if (filelist != nullptr && filelist[0] != nullptr)
+		game->dialogFile = filelist[0];
+	else
+		game->dialogFile = "";
+
+	// Avisamos al bucle principal con un evento. No guardamos ni cargamos aquí
+	// porque esta función puede ejecutarse en otro hilo a la vez que el juego.
+	SDL_Event event{};
+	event.type = DIALOG_EVENT;
+	SDL_PushEvent(&event);
+}
+
+void
+Game::handleDialogEvent()
+{
+	dialogOpen = false;	// se quita la pausa
+
+	if (dialogFile.empty())	// el usuario canceló: no se hace nada
+		return;
+
+	if (dialogType == SAVE_DIALOG) {
+		// Si el usuario no ha escrito la extensión, se añade
+		if (!dialogFile.ends_with(".txt"))
+			dialogFile += ".txt";
+		saveState(dialogFile);
+	}
+	else
+		loadState(dialogFile);
 }
 
 void  
@@ -406,10 +474,10 @@ Game::nextLevel() {
 }
 
 void
-Game::saveState() const {
-	ofstream file(string(LEVEL_ROOT) + SAVE_FILE);
+Game::saveState(const string& filename) const {
+	ofstream file(filename);
 	if (!file)
-		throw GameError("No se puede escribir el archivo "s + SAVE_FILE);
+		throw GameError("No se puede escribir el archivo " + filename);
 
 	file << level << ' ' << score << '\n';	// cabecera: nivel y puntuación
 	for (SceneObject* object : objects) {
@@ -420,17 +488,17 @@ Game::saveState() const {
 }
 
 void
-Game::loadState() {
-	ifstream file(string(LEVEL_ROOT) + SAVE_FILE);
+Game::loadState(const string& filename) {
+	ifstream file(filename);
 	if (!file)
-		throw FileNotFoundError(string(LEVEL_ROOT) + SAVE_FILE);
+		throw FileNotFoundError(filename);
 
 	string text;
 	getline(file, text);
 	istringstream header(text);
 	int savedLevel = 0, savedScore = 0;
 	if (!(header >> savedLevel >> savedScore))
-		throw FileFormatError(string(LEVEL_ROOT) + SAVE_FILE, 1, "cabecera no valida");
+		throw FileFormatError(filename, 1, "cabecera no valida");
 
 	level = savedLevel;
 	score = savedScore;
@@ -453,21 +521,21 @@ Game::loadState() {
 		if (!(line >> type))		// línea vacía
 			continue;
 
-		objects.push_back(loadObject(type, line, lineNumber));
+		objects.push_back(loadObject(type, line, filename, lineNumber));
 
 		if (!line)	// no había un número donde tocaba
-			throw FileFormatError(SAVE_FILE, lineNumber, "datos no validos");
+			throw FileFormatError(filename, lineNumber, "datos no validos");
 	}
 
 }
 
 SceneObject*
-Game::loadObject(char type, istream& line, int lineNumber)
+Game::loadObject(char type, istream& line, const string& filename, int lineNumber)
 {
 	switch (type) {
 	case 'W':
 		if (bow != nullptr)
-			throw FileFormatError(SAVE_FILE, lineNumber, "hay mas de un arco");
+			throw FileFormatError(filename, lineNumber, "hay mas de un arco");
 		bow = new Bow(this, line);
 		return bow;
 	case 'B':
@@ -477,7 +545,7 @@ Game::loadObject(char type, istream& line, int lineNumber)
 	case 'F':
 		return new Butterfly(this, line);
 	default:
-		throw FileFormatError(SAVE_FILE, lineNumber, "tipo de objeto desconocido: "s + type);
+		throw FileFormatError(filename, lineNumber, "tipo de objeto desconocido: "s + type);
 	}
 }
 

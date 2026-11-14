@@ -1,8 +1,18 @@
 Autores: Adrián Arbas Perdiguero y Alexia Pérez Santana
 
-Funcionalidades opcionales:
-- Opcional 1: clase InfoBar que muestra las flechas restantes y la puntuación en la ventana.
-- Opcional 2: se leen también las opciones bgcolor y balpoints del archivo de configuración.
+Funcionalidades opcionales de la práctica 2:
+- Opcional 1: guardado y carga con SDL_ShowSaveFileDialog y SDL_ShowOpenFileDialog.
+  Ctrl + S y Ctrl + O abren un diálogo para que el usuario elija el archivo, en lugar de
+  usar siempre saved.txt. Mientras el diálogo está abierto el juego se pausa (no se llama
+  a update). El callback del diálogo solo apunta el archivo elegido y manda un evento
+  SDL_EVENT_USER, y es el bucle principal quien guarda o carga al recibirlo. Al guardar,
+  si el nombre no acaba en .txt se le añade.
+- Opcional 2: si no quedan mariposas vivas en la escena, la partida acaba con derrota.
+
+Se mantienen las opcionales de la práctica 1 (ya contabilizadas entonces):
+- Clase InfoBar (ahora subclase de GameObject) con las flechas restantes y la puntuación actualizada
+como nos comentaste.
+- Lectura de las opciones bgcolor y balpoints del archivo de configuración.
 
 Cosas que no funcionan:
 - Ninguna conocida
